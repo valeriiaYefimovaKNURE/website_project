@@ -1,0 +1,8 @@
+.mepower-logo{
+  align-items: center;
+  width: 7%;
+  height: auto;
+  object-fit: contain;
+  margin-left: -18%;
+  transition: width 0.3s ease;
+}
