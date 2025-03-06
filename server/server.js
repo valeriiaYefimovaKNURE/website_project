@@ -4,17 +4,20 @@ const corsOptions={
     origin:["http://localhost:5173"]  //client 
 }
 const {database}=require("./firebaseAdmin.config.js")
+const { getAllUsers } = require("./lib/FirebaseUsers");
 
 const app=express();
 
-app.get("/Users", async (req, res) => {
+app.use(cors(corsOptions));
+
+app.get("/users", async (req, res) => {
     try {
-      const ref = database.ref("/Users"); // Указываем путь в базе
-      const snapshot = await ref.once("value");
-      res.json(snapshot.val());
+      const users=await getAllUsers();
+      res.json(users);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
 });
 
-app.use(cors(corsOptions));
+
+app.listen(8080, () => console.log("Server is running on port 8080"));
