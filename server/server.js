@@ -30,5 +30,14 @@ app.get("/news", async (req, res) => {
   }
 })
 
+app.get("/reported-comments", async (req, res) => {
+  try {
+      const comments = await getReportedComments();
+      res.json(comments);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

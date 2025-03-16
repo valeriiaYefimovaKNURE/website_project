@@ -7,6 +7,26 @@ function AdminPage() {
   const [news,setNews]=useState([]);
   const [comments, setComments] = useState([]);
 
+  const [selectedRow,setSelectedRow]=useState(null);
+  const [editedData,setEditedData]=useState({});
+
+  const handleDoubleClick=(comment)=>{
+    setSelectedRow(comment.id);
+    setEditedData(comment);
+    console.log(comment)
+  }
+
+  const handleChange=(e,field)=>{
+    setEditedData((prev)=>({
+      ...prev,
+      [field]:e.target.value,
+    }));
+  }
+
+  const handleSave=async()=>{
+    setSelectedRow(null);
+  }
+
   const fetchUsers = async () => {
     try {
       const userInfo = await axios.get("http://localhost:8080/users");
@@ -27,36 +47,8 @@ function AdminPage() {
 
   const fetchComments = async () => {
     try {
-        const newsResponse = await axios.get("http://localhost:8080/news");
-        const allNews = newsResponse.data;
-
-        let reportedComments = [];
-
-        Object.entries(allNews).forEach(([newsId, news]) => {
-            if (news.commentsArray && typeof news.commentsArray === 'object') {
-                Object.entries(news.commentsArray).forEach(([commentId, comment]) => {
-                    if (comment.reports && typeof comment.reports === 'object' && Object.keys(comment.reports).length > 0) {
-                        Object.entries(comment.reports).forEach(([reportId, report]) => {
-                            reportedComments.push({
-                                id: commentId, // ID коментаря
-                                reason: report.reason || "Невідома причина",
-                                status: report.status || "Невідомий статус",
-                                time: report.time || "Невідомий час",
-                                text: comment.text || "Без тексту",
-                                user_uid: comment.user_uid || "Невідомий UID",
-                                user_login: comment.user_login || "Анонім",
-                                user_name: comment.user_name || "Невідоме ім'я",
-                                news_id: newsId, // ID новини, до якої відноситься коментар
-                                date: comment.date || "Невідома дата"
-                            });
-                        });
-                    }
-                });
-            }
-        });
-
-        setComments(reportedComments);
-        console.log("Коментарі зі скаргами:", reportedComments);
+      const commentsInfo = await axios.get("http://localhost:8080/reported-comments");
+      setComments(commentsInfo);
     } catch (error) {
         console.error("Помилка при завантаженні коментарів:", error);
     }
@@ -187,26 +179,37 @@ function AdminPage() {
                 <th className="border border-gray-400 p-2 w-32">Статус</th>
                 <th className="border border-gray-400 p-2 w-22">Дата скарги</th>
                 <th className="border border-gray-400 p-2 w-16">Дата коментаря</th>
-                <th className="border border-gray-400 p-2 w-16 truncate overflow-hidden text-ellipsis">ID власника коментаря</th>
+                <th className="border border-gray-400 p-2 w-16 truncate overflow-hidden text-ellipsis">ID власника</th>
                 <th className="border border-gray-400 p-2 w-16">Автор коментаря</th>
                 <th className="border border-gray-400 p-2 w-16 truncate overflow-hidden text-ellipsis">ID новини</th>
             </tr>
         </thead>
         <tbody>
             {comments.map((comment, index) => (
-                <tr key={comment.id} className="hover:bg-gray-100">
+                <tr key={comment.id} className="hover:bg-gray-100" onDoubleClick={()=>handleDoubleClick(comment)}>
                     <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
                     <td className="border border-gray-400 p-2 text-center w-16 break-all whitespace-normal">{comment.id}</td>
                     <td className="border border-gray-400 p-2">{comment.text}</td>
-                    <td className="border border-gray-400 p-2">{comment.reason}</td>
-                    <td className="border border-gray-400 p-2">{comment.status}</td>
+                    <td className="border border-gray-400 p-2">
+                      
+                      {comment.reason}
+                    </td>
+                    <td className="border border-gray-400 p-2">
+                    {selectedRow===comment.id?(
+                        <select value={editedData.status} onChange={(e)=>handleChange(e,"status")} className='border'>
+                          <option value="pending">Pending</option>
+                          <option value="resolved">Resolved</option>
+                          <option value="warning">Warning</option>
+                        </select>
+                      ):(
+                        comment.status
+                      )}
+                    </td>
                     <td className="border border-gray-400 p-2">{comment.time}</td>
                     <td className="border border-gray-400 p-2">{comment.date}</td>
                     <td className="border border-gray-400 p-2 text-center w-16 break-all whitespace-normal">{comment.user_uid}</td>
                     <td className="border border-gray-400 p-2">{comment.user_login}</td>
                     <td className="border border-gray-400 p-2 text-center w-16 break-all whitespace-normal">{comment.news_id}</td>
-
-
                 </tr>
             ))}
         </tbody>
@@ -214,8 +217,11 @@ function AdminPage() {
 ) : selectedText === "Comments" ? (
     <p>Немає коментарів з скаргами</p>
 ) : null}
-
-
+{selectedRow && (
+  <button onClick={handleSave} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
+    Сохранить изменения
+  </button>
+)}
       </div>
     </div>
   )
