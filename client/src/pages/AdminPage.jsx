@@ -48,7 +48,7 @@ function AdminPage() {
   const fetchComments = async () => {
     try {
       const commentsInfo = await axios.get("http://localhost:8080/reported-comments");
-      setComments(commentsInfo);
+      setComments(commentsInfo.data);
     } catch (error) {
         console.error("Помилка при завантаженні коментарів:", error);
     }
@@ -168,7 +168,7 @@ function AdminPage() {
       ) : null}
 
       {/* Таблиця Коментарі */}
-      {selectedText === 'Comments' && comments.length > 0 ? (
+      {selectedText === 'Comments' && comments && comments.length > 0 ? (
         <table className="border-collapse border border-gray-400 w-full mt-5 table-fixed">
         <thead>
             <tr className="bg-gray-200">
@@ -186,24 +186,29 @@ function AdminPage() {
         </thead>
         <tbody>
             {comments.map((comment, index) => (
-                <tr key={comment.id} className="hover:bg-gray-100" onDoubleClick={()=>handleDoubleClick(comment)}>
+                <tr 
+                    key={comment.id || index}
+                    className="hover:bg-gray-100" 
+                    onDoubleClick={() => handleDoubleClick(comment)}
+                >
                     <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
                     <td className="border border-gray-400 p-2 text-center w-16 break-all whitespace-normal">{comment.id}</td>
                     <td className="border border-gray-400 p-2">{comment.text}</td>
+                    <td className="border border-gray-400 p-2">{comment.reason}</td>
                     <td className="border border-gray-400 p-2">
-                      
-                      {comment.reason}
-                    </td>
-                    <td className="border border-gray-400 p-2">
-                    {selectedRow===comment.id?(
-                        <select value={editedData.status} onChange={(e)=>handleChange(e,"status")} className='border'>
-                          <option value="pending">Pending</option>
-                          <option value="resolved">Resolved</option>
-                          <option value="warning">Warning</option>
-                        </select>
-                      ):(
-                        comment.status
-                      )}
+                        {selectedRow === comment.id ? (
+                            <select 
+                                value={editedData?.status || "pending"} 
+                                onChange={(e) => handleChange(e, "status")} 
+                                className="border"
+                            >
+                                <option value="pending">Pending</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="warning">Warning</option>
+                            </select>
+                        ) : (
+                            comment.status
+                        )}
                     </td>
                     <td className="border border-gray-400 p-2">{comment.time}</td>
                     <td className="border border-gray-400 p-2">{comment.date}</td>
@@ -214,14 +219,15 @@ function AdminPage() {
             ))}
         </tbody>
     </table>
-) : selectedText === "Comments" ? (
-    <p>Немає коментарів з скаргами</p>
-) : null}
-{selectedRow && (
-  <button onClick={handleSave} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-    Сохранить изменения
-  </button>
-)}
+    ) : selectedText === "Comments" ? (
+      <p>Немає коментарів з скаргами</p>
+    ) : null}
+      {/* Кнопка збереження під час редагування */}
+      {selectedRow && (
+        <button onClick={handleSave} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
+          Зберегти зміни
+        </button>
+      )}
       </div>
     </div>
   )

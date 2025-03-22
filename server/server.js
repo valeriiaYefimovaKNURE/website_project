@@ -5,7 +5,7 @@ const corsOptions={
     methods: ["GET", "POST", "PUT", "DELETE"]
 }
 const { getAllUsers } = require("./lib/FirebaseUsers");
-const { getAllNews }=require("./lib/FirebaseNews");
+const { getAllNews, getReportedComments }=require("./lib/FirebaseNews");
 
 const PORT = 8080;
 
