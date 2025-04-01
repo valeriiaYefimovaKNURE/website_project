@@ -4,7 +4,15 @@ const getAllNews=async()=>{
     try {
         const ref=database.ref("/News");
         const snapshot=await ref.once("value") // Получаем данные один раз
-        return snapshot.val() || {};
+        const data = snapshot.val() || {};
+
+        // Преобразуем объект в массив, добавляя id в каждый элемент
+        const formattedNews = Object.entries(data).map(([id, newsData]) => ({
+            id, 
+            ...newsData
+        }));
+
+        return formattedNews;
     } catch (error) {
         console.error("FirebaseNews.js / getAllNews() : Помилка при отриманні данних новин.")
         throw new Error("Не вдалось завантажити новини");
@@ -14,13 +22,13 @@ const getAllNews=async()=>{
 const getReportedComments = async () => {
     try {
         const allNews = await getAllNews();
-        if (!allNews || typeof allNews !== "object") {
+        if (!allNews || !Array.isArray(allNews)) {
             throw new Error("Дані про новини невалідні");
         }
 
         let reportedComments = [];
 
-        Object.entries(allNews).forEach(([newsId, news]) => {
+        allNews.forEach((news, index) => {
             if (news.commentsArray && typeof news.commentsArray === "object") {
                 Object.entries(news.commentsArray).forEach(([commentId, comment]) => {
                     if (comment.reports && typeof comment.reports === "object" && Object.keys(comment.reports).length > 0) {
@@ -33,7 +41,7 @@ const getReportedComments = async () => {
                             user_uid: comment.user_uid || "Невідомий UID",
                             user_login: comment.user_login || "Анонім",
                             user_name: comment.user_name || "Невідоме ім'я",
-                            news_id: newsId,
+                            news_id: news.id,
                             date: comment.date || "Невідома дата",
                         });
                     }
