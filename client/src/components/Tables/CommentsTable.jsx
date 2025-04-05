@@ -14,7 +14,7 @@ const CommentsTable = ({comments,onSave}) => {
         { key: "news_id", label: "ID новини" },
     ]
 
-    return <BaseTable columns={columns} data={comments} onSave={onSave}/>;
+    return <BaseTable columns={columns} data={comments} onSave={onSave} tableType="comments"/>;
 };
  
 export default CommentsTable;

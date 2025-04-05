@@ -56,4 +56,23 @@ const getReportedComments = async () => {
     }
 };
 
-module.exports = { getAllNews, getReportedComments};
+const updateNewsData=async(newsId, updatedData)=>{
+    try{
+        const ref=database.ref(`News/${newsId}`);
+
+        await update(newsId, updatedData);
+    }catch(error){
+        console.error("FirebaseNews.js / updateNewsData() : Помилка при оновленні новини.")
+    }
+}
+
+const updateCommentReport=async(newsId, commentId, updatedData)=>{
+    try{
+        const commentRef=ref(database,`News/${newsId}/commentsArray/${commentId}`);
+        await update(commentRef,updatedData);
+    }catch(error){
+        console.error("FirebaseNews.js / updateCommentReport() : Помилка при оновленні даних коментаря.")
+    }
+}
+
+module.exports = { getAllNews, getReportedComments, updateCommentReport, updateNewsData};

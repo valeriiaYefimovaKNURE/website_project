@@ -4,8 +4,8 @@ const corsOptions={
     origin:["http://localhost:5173"],  //client 
     methods: ["GET", "POST", "PUT", "DELETE"]
 }
-const { getAllUsers } = require("./lib/FirebaseUsers");
-const { getAllNews, getReportedComments }=require("./lib/FirebaseNews");
+const { getAllUsers,updateUserData } = require("./lib/FirebaseUsers");
+const { getAllNews, getReportedComments, updateCommentReport, updateNewsData }=require("./lib/FirebaseNews");
 
 const PORT = 8080;
 
@@ -39,5 +39,47 @@ app.get("/reported-comments", async (req, res) => {
   }
 });
 
+app.put("/reported-comments/:newsId/:commentId", async (req,res)=>{
+  try{
+    const {newsId, commentId}=req.params;
+    const updatedData=req.body;
+
+
+    await updateCommentReport(newsId,commentId,updatedData);
+
+    res.status(200).json({success: true});
+  } catch(error){
+    console.error("Сервер: Помилка оновлення репорта на коментарій новини",error.message);
+    res.status(500).json({error:error.message});
+  }
+})
+
+app.put("/users/:userId", async (req,res)=>{
+  try{
+    const {userId}=req.params;
+    const updatedData=req.body;
+
+    await updateUserData(userId,updatedData);
+
+    res.status(200).json({success: true});
+  }catch(error){
+    console.error("Сервер: Помилка оновлення даних про користувача",error.message);
+    res.status(500).json({error:error.message});
+  }
+});
+
+app.put("/news/:newsId", async (req,res)=>{
+  try{
+    const {newsId}=req.params;
+    const updatedData=req.body;
+
+    await updateNewsData(newsId, updatedData);
+
+    res.status(200).json({success: true});
+  }catch(error){
+    console.error("Сервер: Помилка оновлення даних новини",error.message);
+    res.status(500).json({error:error.message});
+  }
+})
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

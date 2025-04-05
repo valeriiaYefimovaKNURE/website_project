@@ -10,7 +10,7 @@ const ReportsTable = ({reports,onSave}) => {
         { key: "date", label: "Дата коментаря" },
     ]
 
-    return <BaseTable columns={columns} data={reports} onSave={onSave}/>;
+    return <BaseTable columns={columns} data={reports} onSave={onSave} tableType="reports"/>;
 };
  
 export default ReportsTable;

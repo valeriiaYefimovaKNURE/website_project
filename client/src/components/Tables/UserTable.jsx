@@ -17,7 +17,7 @@ const UserTable = ({users,onSave}) => {
     ];
 
 
-    return <BaseTable columns={columns} data={users} onSave={onSave}/>;
+    return <BaseTable columns={columns} data={users} onSave={onSave} tableType="users"/>;
 };
  
 export default UserTable;
