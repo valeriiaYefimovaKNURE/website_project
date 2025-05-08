@@ -56,11 +56,14 @@ const getReportedComments = async () => {
     }
 };
 
-const updateNewsData=async(newsId, updatedData)=>{
+const updateNewsData=async(newsId, updatedFields)=>{
     try{
+        if (typeof updatedFields !== "object") throw new Error("Некоректні дані");
+        
         const ref=database.ref(`News/${newsId}`);
-
-        await update(newsId, updatedData);
+        await ref.update(updatedFields)
+            .then(() => console.log("Оновлені поля:", updatedFields))
+            .catch(console.error);
     }catch(error){
         console.error("FirebaseNews.js / updateNewsData() : Помилка при оновленні новини.")
     }

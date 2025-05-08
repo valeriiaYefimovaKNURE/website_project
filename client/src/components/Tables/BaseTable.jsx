@@ -11,7 +11,7 @@ const BaseTable = ({ columns, data, onSave, tableType }) => {
 
   const handleDoubleClick = (row) => {
     setSelectedRow(row.id);
-    setEditedData(row);
+    setEditedData({...row});
   };
 
   const handleChange = (e, field) => {
@@ -29,7 +29,23 @@ const BaseTable = ({ columns, data, onSave, tableType }) => {
   };
 
   const handleSave = () => {
-    onSave(editedData);
+    if (!editedData.id) {
+      alert("Немає ID користувача(-ки)!");
+      return;
+    }
+    
+    const originalRow=data.find((item)=>item.id===editedData.id);
+    const updatedFields={};
+
+    for(const key in editedData){
+      if(editedData[key]!==originalRow[key]){
+        updatedFields[key]=editedData[key];
+      }
+    }
+
+    //console.log("Отправляемые данные:", editedData);
+
+    onSave(editedData.id,updatedFields);
     setSelectedRow(null);
   };
 
@@ -50,7 +66,10 @@ const BaseTable = ({ columns, data, onSave, tableType }) => {
       return col.type === "select" ? (
         <Select
           options={col.options.map(opt => ({ value: opt, label: opt }))}
-          value={{ value: editedData[col.key] || row[col.key], label: editedData[col.key] || row[col.key] }}
+          value={{
+            value: editedData[col.key] !== undefined ? editedData[col.key] : row[col.key],
+            label: editedData[col.key] !== undefined ? editedData[col.key] : row[col.key],
+          }}
           onChange={(selected) => handleSelectChange(selected, col.key)}
           styles={{
             option: (base) => ({
@@ -63,7 +82,7 @@ const BaseTable = ({ columns, data, onSave, tableType }) => {
       ) : (
         <textarea
           className="border w-full min-h-[100px] resize-y"
-          value={editedData[col.key] || ""}
+          value={editedData[col.key] !== undefined ? editedData[col.key] : row[col.key]}
           onChange={(e) => handleChange(e, col.key)}
         />
       );

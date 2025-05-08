@@ -10,14 +10,16 @@ function AdminPage() {
   const [news,setNews]=useState([]);
   const [comments, setComments] = useState([]);
 
-  const handleSaveCommentsData=async(editedData)=>{
+  const handleSaveCommentsData=async(id, editedData)=>{
     try{
+      if (!id) throw new Error("Немає ID новини або коментаря для оновлення");
+
       const response=await fetch(`http://localhost:8080/reported-comments/${editedData.news_id}/${editedData.id}`,{
         method:"PUT",
         headers:{
           "Content-type":"application/json"
         },
-        body:JSON.stringify({editedData})
+        body:JSON.stringify(editedData)
       })
       if(!response.ok) throw new Error("Не вдалося зберегти зміни щодо оновлення репорту на коментар");
       console.log(response)
@@ -28,16 +30,21 @@ function AdminPage() {
     }
   }
 
-  const handleSaveUserData=async(editedData)=>{
+  const handleSaveUserData=async(id, editedData)=>{
     try{
-      const response=await fetch(`http://localhost:8080/users/${editedData.id}`,{
+      if (!id) throw new Error("Немає ID користувача(-ки) для оновлення");
+
+      const response=await fetch(`http://localhost:8080/users/${id}`,{
         method:"PUT",
         headers:{
           "Content-type":"application/json"
         },
-        body:JSON.stringify({editedData})
+        body:JSON.stringify(editedData)
       })
-      if(!response.ok) throw new Error("Не вдалося зберегти зміни щодо оновлення даних користувача");
+      if(!response.ok) {
+        const errorText = await response.text();
+        throw new Error("handleSaveUserData(): ", errorText);
+      }
 
       await fetchUsers();
     }catch(error){
@@ -45,18 +52,24 @@ function AdminPage() {
     }
   }
 
-  const handleSaveNewsData=async(editedData)=>{
+  const handleSaveNewsData=async(id, editedData)=>{
     try{
-      const response=await fetch(`http://localhost:8080/news/${editedData.id}`,{
+      if (!id) throw new Error("Немає ID новини для оновлення");
+
+      const response=await fetch(`http://localhost:8080/news/${id}`,{
         method:"PUT",
         headers:{
           "Content-type":"application/json"
         },
-        body:JSON.stringify({editedData})
+        body:JSON.stringify(editedData)
       })
-      if(!response.ok) throw new Error("Не вдалося зберегти зміни щодо оновлення новини");
 
-      await fetchUsers();
+      if(!response.ok) {
+        const errorText = await response.text();
+        throw new Error("handleSaveNewsData(): ", errorText);
+      }
+
+      await fetchNews();
     }catch(error){
       console.error("handleSaveNewsData(): Помилка при збереженні новини:", error.message);
     }
@@ -133,7 +146,7 @@ function AdminPage() {
       {selectedText === 'Comments' && comments && comments.length > 0 ? (
           <CommentsTable comments={comments} onSave={handleSaveCommentsData} />
         ) : selectedText === "Comments" ? (
-          <p>Немає коментарів з скаргами</p>
+          <p>Немає коментарів зі скаргами</p>
         ) : null
       }
       

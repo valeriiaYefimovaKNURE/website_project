@@ -19,10 +19,14 @@ const getAllUsers=async()=>{
     }
 }
 
-const updateUserData=async(userId, editedData)=>{
+const updateUserData=async(userId, updatedFields)=>{
     try{
+        if (typeof updatedFields !== "object") throw new Error("Некоректні дані");
+        
         const ref=database.ref(`Users/${userId}`);
-        await update(userId,editedData);
+        await ref.update(updatedFields)
+                .then(() => console.log("Оновлені поля:", updatedFields))
+                .catch(console.error);
     }catch(error){
         console.error("FirebaseUsers.js / updateUserData() : Помилка при оновленні даних про користувача.")
     }

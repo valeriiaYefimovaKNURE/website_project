@@ -1,4 +1,9 @@
 const express=require("express");
+const app=express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 const cors=require("cors");
 const corsOptions={
     origin:["http://localhost:5173"],  //client 
@@ -9,7 +14,6 @@ const { getAllNews, getReportedComments, updateCommentReport, updateNewsData }=r
 
 const PORT = 8080;
 
-const app=express();
 
 app.use(cors(corsOptions));
 
@@ -42,10 +46,9 @@ app.get("/reported-comments", async (req, res) => {
 app.put("/reported-comments/:newsId/:commentId", async (req,res)=>{
   try{
     const {newsId, commentId}=req.params;
-    const updatedData=req.body;
+    const updatedFields=req.body;
 
-
-    await updateCommentReport(newsId,commentId,updatedData);
+    await updateCommentReport(newsId,commentId,updatedFields);
 
     res.status(200).json({success: true});
   } catch(error){
@@ -57,9 +60,9 @@ app.put("/reported-comments/:newsId/:commentId", async (req,res)=>{
 app.put("/users/:userId", async (req,res)=>{
   try{
     const {userId}=req.params;
-    const updatedData=req.body;
+    const updatedFields=req.body;
 
-    await updateUserData(userId,updatedData);
+    await updateUserData(userId,updatedFields);
 
     res.status(200).json({success: true});
   }catch(error){
@@ -71,9 +74,9 @@ app.put("/users/:userId", async (req,res)=>{
 app.put("/news/:newsId", async (req,res)=>{
   try{
     const {newsId}=req.params;
-    const updatedData=req.body;
+    const updatedFields=req.body;
 
-    await updateNewsData(newsId, updatedData);
+    await updateNewsData(newsId, updatedFields);
 
     res.status(200).json({success: true});
   }catch(error){
