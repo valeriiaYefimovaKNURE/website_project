@@ -30,7 +30,7 @@ function AdminPage() {
     }
   }
 
-  const handleSaveUserData=async(id, editedData)=>{
+  /*const handleSaveUserData=async(id, editedData)=>{
     try{
       if (!id) throw new Error("Немає ID користувача(-ки) для оновлення");
 
@@ -50,7 +50,7 @@ function AdminPage() {
     }catch(error){
       console.error("handleSaveUserData(): Помилка при збереженні даних користувача:", error.message);
     }
-  }
+  }*/
 
   const handleSaveNewsData=async(id, editedData)=>{
     try{
@@ -75,14 +75,14 @@ function AdminPage() {
     }
   }
 
-  const fetchUsers = async () => {
+  /*const fetchUsers = async () => {
     try {
       const userInfo = await axios.get("http://localhost:8080/users");
       setUsers(userInfo.data);
     } catch (error) {
       console.error("AdminPage / Помилка при завантаженні користувачів:", error);
     }
-  };
+  };*/
   
   const fetchNews = async () => {
     try {
@@ -104,9 +104,10 @@ function AdminPage() {
 
 
   useEffect(() => {
-    if (selectedText === "Users") {
+    /*if (selectedText === "Users") {
       fetchUsers();
-    } else if (selectedText === "News") {
+    } else*/ 
+     if (selectedText === "News") {
       fetchNews();
     } else if (selectedText === "Comments") {
       fetchComments();
@@ -117,7 +118,7 @@ function AdminPage() {
     <div className="flex flex-col items-center w-full m-2">
       <h1 className=''>Hello admins</h1>
       <div className='flex space-x-6 m-10'>
-        <button onClick={() => setSelectedText("Users")}>Users</button>
+        {/*<button onClick={() => setSelectedText("Users")}>Users</button>*/}
         <button onClick={() => setSelectedText("News")}>News</button>
         <button onClick={() => setSelectedText("Comments")}>Comments</button>
         <button onClick={() => setSelectedText("Reports")}>Reports</button>
