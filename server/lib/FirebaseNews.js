@@ -18,7 +18,16 @@ const getAllNews=async()=>{
         throw new Error("Не вдалось завантажити новини");
     }
 }
+const createNews=async(newsData)=>{
+    try{
+        const ref=database.ref("/News");
+        await ref.push(newsData);
 
+        console.log("Допис викладено!")
+    }catch(error){
+        console.error("Помилка викладання новини");
+    }
+}
 const getReportedComments = async () => {
     try {
         const allNews = await getAllNews();
@@ -28,7 +37,7 @@ const getReportedComments = async () => {
 
         let reportedComments = [];
 
-        allNews.forEach((news, index) => {
+        allNews.forEach((news) => {
             if (news.commentsArray && typeof news.commentsArray === "object") {
                 Object.entries(news.commentsArray).forEach(([commentId, comment]) => {
                     if (comment.reports && typeof comment.reports === "object" && Object.keys(comment.reports).length > 0) {
@@ -82,4 +91,4 @@ const updateCommentReport=async(newsId, commentId, updatedFields)=>{
     }
 }
 
-module.exports = { getAllNews, getReportedComments, updateCommentReport, updateNewsData};
+module.exports = { getAllNews, createNews, getReportedComments, updateCommentReport, updateNewsData};

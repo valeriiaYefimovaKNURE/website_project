@@ -1,7 +1,7 @@
 import React from 'react'
 import BaseTable from './BaseTable'
 
-const UserTable = ({users,onSave}) => {
+const UserTable = ({users,onSave, onCreate}) => {
     const columns=[
         {key:'id', label:'ID'},
         { key: "imageUri", label: "Фото", editable: true },
@@ -17,7 +17,7 @@ const UserTable = ({users,onSave}) => {
     ];
 
 
-    return <BaseTable columns={columns} data={users} onSave={onSave} tableType="users"/>;
+    return <BaseTable columns={columns} data={users} onSave={onSave} onCreate={onCreate} tableType="users"/>;
 };
  
 export default UserTable;

@@ -2,18 +2,30 @@ import { useState } from 'react';
 import Select from "react-select";
 import images from '../../constants/images';
 
-const BaseTable = ({ columns, data, onSave, tableType }) => {
+const BaseTable = ({ columns, data, onSave, onCreate, tableType }) => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [editedData, setEditedData] = useState({});
+  const [newRowData,setNewRowData]=useState(
+    Object.fromEntries(columns.map(col=>[
+      col.key,
+      col.label === "Дата" ? new Date().toISOString().slice(0, 10) : ""
+    ]))
+  );
 
   const narrowColumns = ["Terms", "Роль", "Стать", "Лайки", "Актуальне", "ID", "Дата", "Посилання", "Статус", "Дата коментаря"];
-  const breakFields = ["ID", "Посилання", "Email", "Логін", "Пароль", "Viper", "ID власника", "ID новини", "Автор коментаря"];
+  const breakFields = ["ID", "Посилання", "Email", "Логін", "Пароль", "Viper", "ID власника", "ID новини", "Автор коментаря","Допис","ID коментаря"];
 
   const handleDoubleClick = (row) => {
     setSelectedRow(row.id);
     setEditedData({...row});
   };
 
+  const handleNewRowChange=(e,field)=>{
+    setNewRowData(prev=>({
+      ...prev,
+      [field]:e.target?e.target.value:e //select
+    }))
+  }
   const handleChange = (e, field) => {
     setEditedData((prev) => ({
       ...prev,
@@ -28,6 +40,22 @@ const BaseTable = ({ columns, data, onSave, tableType }) => {
     }));
   };
 
+  const handleCreate=()=>{
+    if(!onCreate) return;
+
+    //Удаляем пустые поля чтобы не отправлять мусор
+    const cleanedData=Object.fromEntries(
+      Object.entries(newRowData).filter(([_,v])=>v!=="")
+    );
+    if (Object.keys(cleanedData).length === 0) {
+      alert("Неможливо створити запис: немає даних");
+      return;
+    }
+
+    onCreate(cleanedData)
+
+    setNewRowData(Object.fromEntries(columns.map(col => [col.key, ""])));
+  }
   const handleSave = () => {
     if (!editedData.id) {
       alert("Немає ID користувача(-ки)!");
@@ -48,8 +76,67 @@ const BaseTable = ({ columns, data, onSave, tableType }) => {
     onSave(editedData.id,updatedFields);
     setSelectedRow(null);
   };
+  
+  return (
+    <table className="border-collapse border border-gray-400 w-full mt-5 table-fixed">
+      <thead>
+        <tr className="bg-gray-200">
+          <th className="border border-gray-400 p-2 w-5">#</th>
+          {columns.map((col) => (
+            <th key={col.key} className={`border border-gray-400 p-2 ${narrowColumns.includes(col.label) ? 'w-10' : 'w-16'}`}>
+              {col.label}
+            </th>
+          ))}
+          <th className="border border-gray-400 p-2 w-10">Дія</th>
+        </tr>
+      </thead>
+      <tbody>
+        <CreateRow
+          columns={columns}
+          newRowData={newRowData}
+          handleNewRowChange={handleNewRowChange}
+          handleCreate={handleCreate}
+        />
+        {data.map((row, index) => (
+          <tr key={row.id} className="hover:bg-gray-100" onDoubleClick={() => handleDoubleClick(row)}>
+            
+            <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
+            {columns.map((col) => (
+              <td
+                key={col.key}
+                className={`border border-gray-400 p-2 text-center w-auto whitespace-normal ${breakFields.includes(col.label) ? 'break-all' : 'break-word'}`}
+              >
+                <TableCell 
+                  col={col} 
+                  row={row} 
+                  selectedRow={selectedRow}
+                  editedData={editedData}
+                  handleSelectChange={handleSelectChange}
+                  handleChange={handleChange}
+                  tableType={tableType}
+                />
+              </td>
+            ))}
+            <td className="border border-gray-400 p-2 text-center">
+              {selectedRow === row.id && (
+                <button
+                  onClick={handleSave}
+                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                >
+                  💾
+                </button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+};
 
-  const TableCell = ({ col, row }) => {
+export default BaseTable;
+
+const TableCell = ({ col, row, selectedRow, editedData, handleSelectChange, handleChange, tableType }) => {
     const isEditing = selectedRow === row.id && col.editable;
 
     if (col.key === "imageUri") {
@@ -110,46 +197,42 @@ const BaseTable = ({ columns, data, onSave, tableType }) => {
     </>
   );
 
-  return (
-    <table className="border-collapse border border-gray-400 w-full mt-5 table-fixed">
-      <thead>
-        <tr className="bg-gray-200">
-          <th className="border border-gray-400 p-2 w-5">#</th>
-          {columns.map((col) => (
-            <th key={col.key} className={`border border-gray-400 p-2 ${narrowColumns.includes(col.label) ? 'w-10' : 'w-16'}`}>
-              {col.label}
-            </th>
-          ))}
-          <th className="border border-gray-400 p-2 w-10">Дія</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.map((row, index) => (
-          <tr key={row.id} className="hover:bg-gray-100" onDoubleClick={() => handleDoubleClick(row)}>
-            <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
-            {columns.map((col) => (
-              <td
-                key={col.key}
-                className={`border border-gray-400 p-2 text-center w-auto whitespace-normal ${breakFields.includes(col.label) ? 'break-all' : 'break-word'}`}
-              >
-                <TableCell col={col} row={row} />
-              </td>
-            ))}
-            <td className="border border-gray-400 p-2 text-center">
-              {selectedRow === row.id && (
-                <button
-                  onClick={handleSave}
-                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                >
-                  💾
-                </button>
-              )}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-};
+  const CreateRow=({columns, newRowData, handleNewRowChange, handleCreate})=>(
+    <tr className="">
+      <td className="border border-gray-400 p-2 text-center">+</td>
 
-export default BaseTable;
+      {columns.map((col) => (
+        <td key={col.key} className="border border-gray-400 p-2 text-center">
+          {col.label.includes("Дата") ? (
+            <input
+              type="date"
+              className="border w-full"
+              value={newRowData[col.key]}
+              onChange={(e) => handleNewRowChange(e, col.key)}
+            />
+          ):col.type === "select" ? (
+            <Select
+              options={col.options.map(o => ({ value: o, label: o }))}
+              value={newRowData[col.key] ? { value: newRowData[col.key], label: newRowData[col.key] } : null}
+              onChange={(selected) => handleNewRowChange(selected.value, col.key)}
+            />
+          ) : (
+            <textarea
+              className="border w-full min-h-[50px] resize-y"
+              value={newRowData[col.key] || ""}
+              onChange={(e) => handleNewRowChange(e, col.key)}
+            />
+          )}
+        </td>
+      ))}
+
+      <td className="border border-gray-400 p-2 text-center">
+        <button
+          onClick={handleCreate}
+          className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+        >
+          ➕
+        </button>
+      </td>
+    </tr>
+  )

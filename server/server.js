@@ -10,13 +10,14 @@ const corsOptions={
     methods: ["GET", "POST", "PUT", "DELETE"]
 }
 const { getAllUsers,updateUserData } = require("./lib/FirebaseUsers");
-const { getAllNews, getReportedComments, updateCommentReport, updateNewsData }=require("./lib/FirebaseNews");
+const { getAllNews, updateNewsData, createNews }=require("./lib/FirebaseNews");
+const{ getAllComments, updateComment, createComment}=require("./lib/FirebaseComments");
 
 const PORT = 8080;
-
-
 app.use(cors(corsOptions));
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
+//отримання даних
 app.get("/users", async (req, res) => {
     try {
       const users=await getAllUsers();
@@ -33,22 +34,49 @@ app.get("/news", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 })
-
-app.get("/reported-comments", async (req, res) => {
+app.get("/comments", async (req, res) => {
   try {
-      const comments = await getReportedComments();
-      res.json(comments);
+    const comments=await getAllComments();
+    res.json(comments);
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
-});
+})
 
-app.put("/reported-comments/:newsId/:commentId", async (req,res)=>{
+//створення
+app.post("/news", async(req,res)=>{
   try{
-    const {newsId, commentId}=req.params;
+    console.log("POST /news body:", req.body);
+    const newNews=req.body;
+    const created=await createNews(newNews);
+    res.status(201).json(created);
+  }catch(error){
+    console.error("Сервер: Помилка створення допису", error.message);
+    res.status(500).json({ error: error.message });
+  }
+})
+app.post("/comments", async(req,res)=>{
+  try{
+    const { newsId, ...newComment } = req.body;
+    if (!newsId) {
+      return res.status(400).json({ error: "Не вказано ID новини" });
+    }
+
+    const created=await createComment(newsId,newComment);
+    res.status(201).json(created);
+  }catch(error){
+    console.error("Сервер: Помилка збереження коментаря", error.message);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+//оновлення даних
+app.put("/comments/:newsId", async (req,res)=>{
+  try{
+    const {newsId}=req.params;
     const updatedFields=req.body;
 
-    await updateCommentReport(newsId,commentId,updatedFields);
+    await updateComment(newsId,updatedFields);
 
     res.status(200).json({success: true});
   } catch(error){
@@ -85,4 +113,4 @@ app.put("/news/:newsId", async (req,res)=>{
   }
 })
 
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+

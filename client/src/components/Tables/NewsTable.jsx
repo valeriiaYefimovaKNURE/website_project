@@ -1,7 +1,7 @@
 import React from 'react'
 import BaseTable from './BaseTable'
 
-const NewsTable = ({news,onSave}) => {
+const NewsTable = ({news,onSave, onCreate}) => {
     const columns=[
         { key: "id", label: "ID" },
         { key: "imageUri", label: "Фото", editable: true },
@@ -16,7 +16,7 @@ const NewsTable = ({news,onSave}) => {
     ];
     console.log("news:", news);
 
-    return <BaseTable columns={columns} data={news} onSave={onSave} tableType="news"/>;
+    return <BaseTable columns={columns} data={news} onSave={onSave} onCreate={onCreate} tableType="news"/>;
 };
  
 export default NewsTable;
