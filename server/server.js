@@ -10,7 +10,7 @@ const corsOptions={
     methods: ["GET", "POST", "PUT", "DELETE"]
 }
 const { getAllUsers,updateUserData } = require("./lib/FirebaseUsers");
-const { getAllNews, getReportedComments, updateCommentReport, updateNewsData }=require("./lib/FirebaseNews");
+const { getAllNews, getReportedComments, updateCommentReport, updateNewsData, deleteNewsData, deleteReportedComments}=require("./lib/FirebaseNews");
 
 const PORT = 8080;
 
@@ -84,5 +84,28 @@ app.put("/news/:newsId", async (req,res)=>{
     res.status(500).json({error:error.message});
   }
 })
+
+app.delete("/news/:newsId", async (req, res) => {
+  try {
+    const { newsId } = req.params;
+    await deleteNewsData(newsId);
+    res.status(200).json({ success: true, message: "Новину успішно видалено" });
+  } catch (error) {
+    console.error("Сервер: Помилка при видаленні новини:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/reported-comments/:newsId/:commentId", async (req, res) => {
+  try {
+    const { newsId, commentId } = req.params;
+    await deleteReportedComments(newsId, commentId);
+    res.status(200).json({ success: true, message: "Коментар успішно видалено" });
+  } catch (error) {
+    console.error("Сервер: Помилка при видаленні коментаря:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
