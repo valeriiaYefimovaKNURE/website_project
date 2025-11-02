@@ -82,4 +82,35 @@ const updateCommentReport=async(newsId, commentId, updatedFields)=>{
     }
 }
 
-module.exports = { getAllNews, getReportedComments, updateCommentReport, updateNewsData};
+const deleteNewsData = async (newsId) => {
+  try {
+    if (!newsId) throw new Error("Не вказано ID новини для видалення");
+
+    const ref = database.ref(`News/${newsId}`);
+    await ref.remove();
+    console.log(`Новину ${newsId} видалено з бази даних`);
+  } catch (error) {
+    console.error("FirebaseNews.js / deleteNews(): Помилка при видаленні новини", error.message);
+    throw error;
+  }
+};
+
+const deleteReportedComments = async (newsId, commentId) => {
+   try {
+    if (!newsId || !commentId)
+      throw new Error("Не вказано ID новини або коментаря для видалення");
+
+    const ref = database.ref(`News/${newsId}/commentsArray/${commentId}`);
+    await ref.remove();
+
+    console.log(`Коментар ${commentId} з новини ${newsId} видалено`);
+  } catch (error) {
+    console.error(
+      "FirebaseNews.js / deleteComment(): Помилка при видаленні коментаря",
+      error.message
+    );
+    throw error;
+  }
+}
+
+module.exports = { getAllNews, getReportedComments, updateCommentReport, updateNewsData,deleteNewsData, deleteReportedComments};
