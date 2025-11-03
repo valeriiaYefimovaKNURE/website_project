@@ -10,8 +10,8 @@ const corsOptions={
     methods: ["GET", "POST", "PUT", "DELETE"]
 }
 const { getAllUsers,updateUserData } = require("./lib/FirebaseUsers");
-const { getAllNews, updateNewsData, createNews, deleteNewsData, deleteReportedComments}=require("./lib/FirebaseNews");
-const{ getAllComments, updateComment, createComment}=require("./lib/FirebaseComments");
+const { getAllNews, updateNewsData, createNews, deleteNewsData}=require("./lib/FirebaseNews");
+const{ getAllComments, updateComment, createComment, deleteComment}=require("./lib/FirebaseComments");
 
 const PORT = 8080;
 app.use(cors(corsOptions));
@@ -46,9 +46,13 @@ app.get("/comments", async (req, res) => {
 //створення
 app.post("/news", async(req,res)=>{
   try{
-    console.log("POST /news body:", req.body);
-    const newNews=req.body;
-    const created=await createNews(newNews);
+    const newsData=req.body;
+
+    if (!newsData) {
+      return res.status(400).json({ error: "Немає даних для новини" });
+    }
+
+    const created=await createNews(newsData);
     res.status(201).json(created);
   }catch(error){
     console.error("Сервер: Помилка створення допису", error.message);
@@ -57,7 +61,8 @@ app.post("/news", async(req,res)=>{
 })
 app.post("/comments", async(req,res)=>{
   try{
-    const { newsId, ...newComment } = req.body;
+    const newComment=req.body;
+    const newsId=newComment.news_id;
     if (!newsId) {
       return res.status(400).json({ error: "Не вказано ID новини" });
     }
@@ -71,12 +76,12 @@ app.post("/comments", async(req,res)=>{
 })
 
 //оновлення даних
-app.put("/comments/:newsId", async (req,res)=>{
+app.put("/comments/:newsId/:commentId", async (req,res)=>{
   try{
-    const {newsId}=req.params;
+    const {newsId, commentId}=req.params;
     const updatedFields=req.body;
 
-    await updateComment(newsId,updatedFields);
+    await updateComment(newsId, commentId, updatedFields);
 
     res.status(200).json({success: true});
   } catch(error){
@@ -113,10 +118,13 @@ app.put("/news/:newsId", async (req,res)=>{
   }
 })
 
+//видалення
 app.delete("/news/:newsId", async (req, res) => {
   try {
     const { newsId } = req.params;
+
     await deleteNewsData(newsId);
+
     res.status(200).json({ success: true, message: "Новину успішно видалено" });
   } catch (error) {
     console.error("Сервер: Помилка при видаленні новини:", error.message);
@@ -124,10 +132,12 @@ app.delete("/news/:newsId", async (req, res) => {
   }
 });
 
-app.delete("/reported-comments/:newsId/:commentId", async (req, res) => {
+app.delete("/comments/:newsId/:commentId", async (req, res) => {
   try {
     const { newsId, commentId } = req.params;
-    await deleteReportedComments(newsId, commentId);
+
+    await deleteComment(newsId, commentId);
+
     res.status(200).json({ success: true, message: "Коментар успішно видалено" });
   } catch (error) {
     console.error("Сервер: Помилка при видаленні коментаря:", error.message);

@@ -9,7 +9,7 @@ const NewsTable = ({news,onSave, onCreate, onDelete}) => {
         { key: "subtitle", label: "Опис", editable: true },
         { key: "creatorName", label: "Автор", editable:true },
         { key: "date", label: "Дата" },
-        { key: "isActual", label: "Актуальне", editable:true, type:"select", options:["True","False"] },
+        { key: "isActual", label: "Актуальне", editable:true, type:"select", options:[{label:"Так", value:true}, {label:"Ні", value:false}] },
         { key: "likes", label: "Лайки", editable:true },
         { key: "link", label: "Посилання", editable:true },
         { key: "theme", label: "Тема", editable:true, type:"select", options:["Спорт","Соціальне","Історія","Активізм","Освіта","Новини","ЛГБТКІА","Психологія"] },

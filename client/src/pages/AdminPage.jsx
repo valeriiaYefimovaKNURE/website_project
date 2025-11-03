@@ -8,109 +8,7 @@ function AdminPage() {
   const [selectedText, setSelectedText] = useState("")
   const [users, setUsers] = useState([]);
   const [news,setNews]=useState([]);
-  const[comments, setComments]=useState([]);
-
-   const handleSaveCommentsData=async(id, editedData)=>{
-    try{
-      if (!id) throw new Error("Немає ID новини або коментаря для оновлення");
-
-      const response=await fetch(`http://localhost:8080/comments/${editedData.news_id}/${editedData.id}`,{
-        method:"PUT",
-        headers:{
-          "Content-type":"application/json"
-        },
-        body:JSON.stringify(editedData)
-      })
-      if(!response.ok) throw new Error("Не вдалося зберегти зміни щодо оновлення репорту на коментар");
-      console.log(response)
-
-      await fetchComments();
-    }catch(error){
-      console.error("handleSaveCommentsData(): Помилка при збереженні коментаря:", error.message);
-    }
-  }
-
-  const handleDeleteCommentsData = async (id) => {
-    try {
-      if (!id) throw new Error("Немає ID коментаря для видалення");
-
-      const comment = comments.find(c => c.id === id);
-      if (!comment) throw new Error("Не знайдено коментар для видалення");
-      
-      const response = await fetch(
-        `http://localhost:8080/reported-comments/${comment.news_id}/${id}`,
-        { method: "DELETE" }
-      );
-
-      if (!response.ok) throw new Error("Помилка при видаленні коментаря");
-      
-      await fetchComments(); 
-    } catch (error) {
-      console.error("handleDeleteCommentsData():", error.message);
-      alert(error.message); 
-    }
-  };
-
-
-  /*const handleSaveUserData=async(id, editedData)=>{
-    try{
-      if (!id) throw new Error("Немає ID користувача(-ки) для оновлення");
-
-      const response=await fetch(`http://localhost:8080/users/${id}`,{
-        method:"PUT",
-        headers:{
-          "Content-type":"application/json"
-        },
-        body:JSON.stringify(editedData)
-      })
-      if(!response.ok) {
-        const errorText = await response.text();
-        throw new Error("handleSaveUserData(): ", errorText);
-      }
-
-      await fetchUsers();
-    }catch(error){
-      console.error("handleSaveUserData(): Помилка при збереженні даних користувача:", error.message);
-    }
-  }*/
-
-  const handleSaveNewsData=async(id, editedData)=>{
-    try{
-      if (!id) throw new Error("Немає ID новини для оновлення");
-
-      const response=await fetch(`http://localhost:8080/news/${id}`,{
-        method:"PUT",
-        headers:{
-          "Content-type":"application/json"
-        },
-        body:JSON.stringify(editedData)
-      })
-
-      if(!response.ok) {
-        const errorText = await response.text();
-        throw new Error("handleSaveNewsData(): ", errorText);
-      }
-
-      await fetchNews();
-    }catch(error){
-      console.error("handleSaveNewsData(): Помилка при збереженні новини:", error.message);
-    }
-  }
-
-  const handleDeleteNewsData = async (id) => {
-    try {
-      const response = await fetch(`http://localhost:8080/news/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Помилка при видаленні новини");
-      await fetchNews(); 
-    } catch (error) {
-      console.error("handleDeleteNewsData():", error.message);
-    }
-  };
-
-
-
+  const [comments, setComments]=useState([]);
 
   /*const fetchUsers = async () => {
     try {
@@ -120,53 +18,7 @@ function AdminPage() {
       console.error("AdminPage / Помилка при завантаженні користувачів:", error);
     }
   };*/
-  const createNews=async(newsData)=>{
-    try {
-      const response = await fetch("http://localhost:8080/news", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newsData),
-      });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Ошибка при создании новости");
-      }
-
-      const createdNews = await response.json();
-      console.log("Допис викладено:", createdNews);
-
-      await fetchNews();
-    } catch (error) {
-      console.error("handleCreateNews:", error.message);
-    }
-  }
-  const createComment=async(data)=>{
-    try {
-      const response = await fetch("http://localhost:8080/comments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(commentData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Ошибка при создании комментария");
-      }
-
-      const createdComment = await response.json();
-      console.log("Коментарій створено:", createdComment);
-
-      await fetchComments();
-    } catch (error) {
-      console.error("handleCreateComment:", error.message);
-    }
-  }
-  
   const fetchNews = async () => {
     try {
       const newsInfo = await axios.get("http://localhost:8080/news");
@@ -193,6 +45,150 @@ function AdminPage() {
       setComments(formatted);
     } catch (error) {
       console.error("Помилка при завантаженні коментарів:", error);
+    }
+  };
+
+  const createNews=async(newsData)=>{
+    try {
+      const response = await fetch("http://localhost:8080/news", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newsData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Ошибка при создании новости");
+      }
+
+      const createdNews = await response.json();
+      console.log("Допис викладено:", createdNews);
+
+      await fetchNews();
+    } catch (error) {
+      console.error("handleCreateNews:", error.message);
+    }
+  }
+  const createComment=async(commentData)=>{
+    try {
+      const response = await fetch("http://localhost:8080/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(commentData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Ошибка при создании комментария");
+      }
+
+      const createdComment = await response.json();
+      console.log("Коментарій створено:", createdComment);
+
+      await fetchComments();
+    } catch (error) {
+      console.error("handleCreateComment:", error.message);
+    }
+  }
+
+  /*const handleSaveUserData=async(id, editedData)=>{
+    try{
+      if (!id) throw new Error("Немає ID користувача(-ки) для оновлення");
+
+      const response=await fetch(`http://localhost:8080/users/${id}`,{
+        method:"PUT",
+        headers:{
+          "Content-type":"application/json"
+        },
+        body:JSON.stringify(editedData)
+      })
+      if(!response.ok) {
+        const errorText = await response.text();
+        throw new Error("handleSaveUserData(): ", errorText);
+      }
+
+      await fetchUsers();
+    }catch(error){
+      console.error("handleSaveUserData(): Помилка при збереженні даних користувача:", error.message);
+    }
+  }*/
+
+  const handleSaveNewsData=async(row, updatedFields)=>{
+    try{
+      const newsId=row.id;
+      if (!newsId) throw new Error("Немає ID новини для оновлення");
+
+      const response=await fetch(`http://localhost:8080/news/${newsId}`,{
+        method:"PUT",
+        headers:{
+          "Content-type":"application/json"
+        },
+        body:JSON.stringify(updatedFields)
+      })
+
+      if(!response.ok) throw new Error("Виникла помилка при оновленні даних новини");
+      console.log(response);
+
+      await fetchNews();
+    }catch(error){
+      console.error("handleSaveNewsData(): Помилка при збереженні новини:", error.message);
+    }
+  }
+
+  const handleSaveCommentsData=async(row, updatedFields)=>{
+    try{
+      const newsId=row.news_id;
+      const commentId=row.id;
+
+      if (!newsId || !commentId) throw new Error("news_id або id коментаря відсутні!");
+
+      const response=await fetch(`http://localhost:8080/comments/${newsId}/${commentId}`,{
+        method:"PUT",
+        headers:{"Content-type":"application/json"},
+        body:JSON.stringify(updatedFields)
+      })
+      if(!response.ok) throw new Error("Не вдалося зберегти зміни щодо оновлення репорту на коментар");
+      console.log(response)
+
+      await fetchComments();
+    }catch(error){
+      console.error("handleSaveCommentsData(): Помилка при збереженні коментаря:", error.message);
+    }
+  }
+  
+  const handleDeleteNewsData = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8080/news/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Помилка при видаленні новини");
+      await fetchNews(); 
+    } catch (error) {
+      console.error("handleDeleteNewsData():", error.message);
+    }
+  };
+
+  const handleDeleteCommentsData = async (id) => {
+    try {
+      if (!id) throw new Error("Немає ID коментаря для видалення");
+
+      const comment = comments.find(c => c.id === id);
+      if (!comment) throw new Error("Не знайдено коментар для видалення");
+      
+      const response = await fetch(`http://localhost:8080/comments/${comment.news_id}/${id}`,{ 
+        method: "DELETE" 
+      });
+
+      if (!response.ok) throw new Error("Помилка при видаленні коментаря");
+      
+      await fetchComments(); 
+    } catch (error) {
+      console.error("handleDeleteCommentsData():", error.message);
+      alert(error.message); 
     }
   };
 

@@ -20,50 +20,25 @@ const getAllNews=async()=>{
 }
 const createNews=async(newsData)=>{
     try{
-        const ref=database.ref("/News");
-        await ref.push(newsData);
+        const ref=database.ref("/News").push();
+        const newsId=ref.key;
+
+        console.log("createNews(): newsData: ", newsData);
+        const newNews={
+            id:newsId,
+            ...newsData,
+            creatorLogin:newsData.creatorName
+        };
+
+        await ref.set(newNews);
 
         console.log("Допис викладено!")
+        return newNews;
     }catch(error){
         console.error("Помилка викладання новини");
+        throw error;
     }
 }
-const getReportedComments = async () => {
-    try {
-        const allNews = await getAllNews();
-        if (!allNews || !Array.isArray(allNews)) {
-            throw new Error("Дані про новини невалідні");
-        }
-
-        let reportedComments = [];
-
-        allNews.forEach((news) => {
-            if (news.commentsArray && typeof news.commentsArray === "object") {
-                Object.entries(news.commentsArray).forEach(([commentId, comment]) => {
-                    if (comment.reports && typeof comment.reports === "object" && Object.keys(comment.reports).length > 0) {
-                        reportedComments.push({
-                            id: commentId,
-                            reason: Object.values(comment.reports)[0]?.reason || "Невідома причина",
-                            status: Object.values(comment.reports)[0]?.status || "Невідомий статус",
-                            time: Object.values(comment.reports)[0]?.time || "Невідомий час",
-                            text: comment.text || "Без тексту",
-                            user_uid: comment.user_uid || "Невідомий UID",
-                            user_login: comment.user_login || "Анонім",
-                            user_name: comment.user_name || "Невідоме ім'я",
-                            news_id: news.id,
-                            date: comment.date || "Невідома дата",
-                        });
-                    }
-                });
-            }
-        });
-
-        return reportedComments;
-    } catch (error) {
-        console.error("FirebaseNews.js / getReportedComments():", error.message);
-        throw new Error("Не вдалось завантажити коментарі зі скаргами");
-    }
-};
 
 const updateNewsData=async(newsId, updatedFields)=>{
     try{
@@ -75,19 +50,6 @@ const updateNewsData=async(newsId, updatedFields)=>{
             .catch(console.error);
     }catch(error){
         console.error("FirebaseNews.js / updateNewsData() : Помилка при оновленні новини.")
-    }
-}
-
-const updateCommentReport=async(newsId, commentId, updatedFields)=>{
-    try{
-        if (typeof updatedFields !== "object") throw new Error("Некоректні дані");
-
-        const ref=database.ref(`News/${newsId}/commentsArray/${commentId}`);
-        await ref.update(updatedFields)
-            .then(() => console.log("Оновлені поля:", updatedFields))
-            .catch(console.error);
-    }catch(error){
-        console.error("FirebaseNews.js / updateCommentReport() : Помилка при оновленні даних коментаря.")
     }
 }
 
@@ -104,22 +66,6 @@ const deleteNewsData = async (newsId) => {
   }
 };
 
-const deleteReportedComments = async (newsId, commentId) => {
-   try {
-    if (!newsId || !commentId)
-      throw new Error("Не вказано ID новини або коментаря для видалення");
 
-    const ref = database.ref(`News/${newsId}/commentsArray/${commentId}`);
-    await ref.remove();
 
-    console.log(`Коментар ${commentId} з новини ${newsId} видалено`);
-  } catch (error) {
-    console.error(
-      "FirebaseNews.js / deleteComment(): Помилка при видаленні коментаря",
-      error.message
-    );
-    throw error;
-  }
-}
-
-module.exports = { getAllNews, getReportedComments, createNews, updateCommentReport, updateNewsData,deleteNewsData, deleteReportedComments};
+module.exports = { getAllNews, createNews, updateNewsData,deleteNewsData};
