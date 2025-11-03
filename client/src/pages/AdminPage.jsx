@@ -205,12 +205,18 @@ function AdminPage() {
 
   return (
     <div className="flex flex-col items-center w-full m-2">
-      <h1 className=''>Hello admins</h1>
+
+       <button onClick={() => navigate("/")}
+       className="absolute top-4 right-6 bg-[#AD89BD] text-white px-4 py-2 rounded-full hover:bg-[#9a75ac] transition" >На головну</button>
+
+    
+      <h1 className="mt-16">Hello admins</h1>
       <div className='flex space-x-6 m-10'>
         {/*<button onClick={() => setSelectedText("Users")}>Users</button>*/}
         <button onClick={() => setSelectedText("News")}>News</button>
         <button onClick={() => setSelectedText("Comments")}>Comments</button>
         <button onClick={() => setSelectedText("Reports")}>Reports</button>
+      
       </div>
       <input className="border-1" type="search" placeholder="Пошук..." />
       <h1>{selectedText}</h1>

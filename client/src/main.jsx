@@ -7,6 +7,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import AdminPage from './pages/AdminPage.jsx';
+import AuthorizationPage from './pages/AuthorizationPage.jsx'; 
 
 const router = createBrowserRouter([
   {
@@ -16,6 +17,11 @@ const router = createBrowserRouter([
   {
     path: "admin",
     element: <AdminPage/>,
+  },
+
+  {
+    path: "auth",
+    element: <AuthorizationPage />,
   },
 ]);
 

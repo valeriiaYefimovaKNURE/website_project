@@ -18,7 +18,7 @@ function App() {
       <img src="mepower_logo.png" className='mepower-logo'/>
 
       <div>
-        <Link to="/admin">
+        <Link to="/auth">
           <button>Увійти</button>
         </Link>
       </div>
