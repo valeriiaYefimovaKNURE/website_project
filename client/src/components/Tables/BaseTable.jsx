@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Select from "react-select";
 import images from '../../constants/images';
 
-const BaseTable = ({ columns, data, onSave, onCreate, tableType }) => {
+const BaseTable = ({ columns, data, onSave, onCreate, onDelete, tableType }) => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [editedData, setEditedData] = useState({});
   const [newRowData,setNewRowData]=useState(
@@ -61,7 +61,7 @@ const BaseTable = ({ columns, data, onSave, onCreate, tableType }) => {
       alert("Немає ID користувача(-ки)!");
       return;
     }
-    
+  
     const originalRow=data.find((item)=>item.id===editedData.id);
     const updatedFields={};
 
@@ -76,7 +76,17 @@ const BaseTable = ({ columns, data, onSave, onCreate, tableType }) => {
     onSave(editedData.id,updatedFields);
     setSelectedRow(null);
   };
-  
+
+  const handleDelete =()=>{
+     if (!editedData.id) {
+      alert("Немає ID користувача(-ки)!");
+      return;
+    }
+    if (window.confirm("Ви впевнені, що хочете видалити цей запис?")) {
+      onDelete(editedData.id);
+      setSelectedRow(null);
+    }
+  }
   return (
     <table className="border-collapse border border-gray-400 w-full mt-5 table-fixed">
       <thead>
@@ -119,12 +129,20 @@ const BaseTable = ({ columns, data, onSave, onCreate, tableType }) => {
             ))}
             <td className="border border-gray-400 p-2 text-center">
               {selectedRow === row.id && (
-                <button
-                  onClick={handleSave}
-                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                >
-                  💾
-                </button>
+                 <>
+                    <button
+                      onClick={handleSave}
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                    >
+                      💾
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                    >
+                      🗑️
+                    </button>
+                </>
               )}
             </td>
           </tr>

@@ -30,6 +30,28 @@ function AdminPage() {
     }
   }
 
+  const handleDeleteCommentsData = async (id) => {
+    try {
+      if (!id) throw new Error("Немає ID коментаря для видалення");
+
+      const comment = comments.find(c => c.id === id);
+      if (!comment) throw new Error("Не знайдено коментар для видалення");
+      
+      const response = await fetch(
+        `http://localhost:8080/reported-comments/${comment.news_id}/${id}`,
+        { method: "DELETE" }
+      );
+
+      if (!response.ok) throw new Error("Помилка при видаленні коментаря");
+      
+      await fetchComments(); 
+    } catch (error) {
+      console.error("handleDeleteCommentsData():", error.message);
+      alert(error.message); 
+    }
+  };
+
+
   /*const handleSaveUserData=async(id, editedData)=>{
     try{
       if (!id) throw new Error("Немає ID користувача(-ки) для оновлення");
@@ -74,6 +96,21 @@ function AdminPage() {
       console.error("handleSaveNewsData(): Помилка при збереженні новини:", error.message);
     }
   }
+
+  const handleDeleteNewsData = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8080/news/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Помилка при видаленні новини");
+      await fetchNews(); 
+    } catch (error) {
+      console.error("handleDeleteNewsData():", error.message);
+    }
+  };
+
+
+
 
   /*const fetchUsers = async () => {
     try {
@@ -193,7 +230,12 @@ function AdminPage() {
 
       {/* Таблиця Новин */}
       {selectedText === "News" && news && news.length > 0 ? (
-          <NewsTable news={news} onSave={handleSaveNewsData} onCreate={createNews}/>
+          <NewsTable 
+            news={news} 
+            onSave={handleSaveNewsData} 
+            onDelete={handleDeleteNewsData}
+            onCreate={createNews}
+          />
         ) : selectedText === "News" ? (
           <p>Немає новин</p>
         ) : null
@@ -201,7 +243,12 @@ function AdminPage() {
 
       {/* Таблиця Коментарі */}
       {selectedText === 'Comments' && comments && comments.length > 0 ? (
-          <CommentsTable comments={comments} onSave={handleSaveCommentsData} onCreate={createComment}/>
+          <CommentsTable 
+            comments={comments} 
+            onSave={handleSaveCommentsData} 
+            onDelete={handleDeleteCommentsData}
+            onCreate={createComment}
+          />
         ) : selectedText === "Comments" ? (
           <p>Немає коментарів до дописів</p>
         ) : null

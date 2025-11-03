@@ -1,6 +1,7 @@
 import React from 'react'
 import BaseTable from './BaseTable'
 
+const CommentsTable = ({comments,onSave,onDelete}) => {
 const CommentsTable = ({comments,onSave, onCreate}) => {
     const columns=[
         { key: "news_id", label: "Допис" },
@@ -15,7 +16,7 @@ const CommentsTable = ({comments,onSave, onCreate}) => {
         { key: "time", label: "Дата скарги" }
     ]
 
-    return <BaseTable columns={columns} data={comments} onSave={onSave} onCreate={onCreate} tableType="comments"/>;
+    return <BaseTable columns={columns} data={comments} onSave={onSave} onCreate={onCreate} onDelete={onDelete} tableType="comments"/>;
 };
  
 export default CommentsTable;
