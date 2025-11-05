@@ -3,21 +3,32 @@ import axios from "axios"
 import UserTable from '../components/Tables/UserTable';
 import NewsTable from '../components/Tables/NewsTable';
 import CommentsTable from '../components/Tables/CommentsTable';
+import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
+import { createAuth } from '../utils/auth';
 
 function AdminPage() {
+  const {user}=useUser();
+  const navigate=useNavigate();
   const [selectedText, setSelectedText] = useState("")
   const [users, setUsers] = useState([]);
   const [news,setNews]=useState([]);
   const [comments, setComments]=useState([]);
 
-  /*const fetchUsers = async () => {
+  useEffect(() => {
+    if (!user) {
+      navigate("/"); 
+    }
+  }, [user, navigate]);
+
+  const fetchUsers = async () => {
     try {
       const userInfo = await axios.get("http://localhost:8080/users");
       setUsers(userInfo.data);
     } catch (error) {
       console.error("AdminPage / Помилка при завантаженні користувачів:", error);
     }
-  };*/
+  };
 
   const fetchNews = async () => {
     try {
@@ -48,6 +59,29 @@ function AdminPage() {
     }
   };
 
+  const createUser=async(userData)=>{
+    try {
+      const userId=await createAuth(userData.email,"123456");
+
+      const response = await fetch("http://localhost:8080/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({userData, userId}),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Помилка при створенні користувача");
+      }
+
+      await fetchUsers();
+    } catch (error) {
+      console.error("createUser:", error.message);
+    }
+  }
+
   const createNews=async(newsData)=>{
     try {
       const response = await fetch("http://localhost:8080/news", {
@@ -60,7 +94,7 @@ function AdminPage() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(errorText || "Ошибка при создании новости");
+        throw new Error(errorText || "Помилка при створенні новини");
       }
 
       const createdNews = await response.json();
@@ -68,7 +102,7 @@ function AdminPage() {
 
       await fetchNews();
     } catch (error) {
-      console.error("handleCreateNews:", error.message);
+      console.error("createNews:", error.message);
     }
   }
   const createComment=async(commentData)=>{
@@ -83,7 +117,7 @@ function AdminPage() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(errorText || "Ошибка при создании комментария");
+        throw new Error(errorText || "Помилка при створенні коментаря");
       }
 
       const createdComment = await response.json();
@@ -91,31 +125,31 @@ function AdminPage() {
 
       await fetchComments();
     } catch (error) {
-      console.error("handleCreateComment:", error.message);
+      console.error("createComment:", error.message);
     }
   }
 
-  /*const handleSaveUserData=async(id, editedData)=>{
+  const handleSaveUserData=async(row, updatedFields)=>{
     try{
-      if (!id) throw new Error("Немає ID користувача(-ки) для оновлення");
+      const userId=row.id;
+      if (!userId) throw new Error("Немає ID користувача(-ки) для оновлення");
 
-      const response=await fetch(`http://localhost:8080/users/${id}`,{
+      const response=await fetch(`http://localhost:8080/users/${userId}`,{
         method:"PUT",
         headers:{
           "Content-type":"application/json"
         },
-        body:JSON.stringify(editedData)
+        body:JSON.stringify(updatedFields)
       })
-      if(!response.ok) {
-        const errorText = await response.text();
-        throw new Error("handleSaveUserData(): ", errorText);
-      }
+
+      if(!response.ok) throw new Error("Виникла помилка при оновленні даних користувача");
+      console.log(response);
 
       await fetchUsers();
     }catch(error){
       console.error("handleSaveUserData(): Помилка при збереженні даних користувача:", error.message);
     }
-  }*/
+  }
 
   const handleSaveNewsData=async(row, updatedFields)=>{
     try{
@@ -160,6 +194,18 @@ function AdminPage() {
     }
   }
   
+  const handleDeleteUserData = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/users/${userId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Помилка при видаленні новини");
+      await fetchUsers(); 
+    } catch (error) {
+      console.error("handleDeleteNewsData():", error.message);
+    }
+  };
+
   const handleDeleteNewsData = async (id) => {
     try {
       const response = await fetch(`http://localhost:8080/news/${id}`, {
@@ -193,26 +239,33 @@ function AdminPage() {
   };
 
   useEffect(() => {
-    /*if (selectedText === "Users") {
+    if (selectedText === "Users") {
       fetchUsers();
-    } else*/ 
-     if (selectedText === "News") {
+    } else if (selectedText === "News") {
       fetchNews();
     } else if (selectedText === "Comments") {
       fetchComments();
     }
   }, [selectedText]);
 
+  
+  if (!user) {
+    return <h1>Loading..</h1>;
+  }
   return (
     <div className="flex flex-col items-center w-full m-2">
+      <div className=''>
+        <p className='absolute top-4 left-6'>{user.name} ― {user.login}</p>
+        <button onClick={() => navigate("/")}
+          className="absolute top-4 right-6 bg-[#AD89BD] text-white px-4 py-2 rounded-full hover:bg-[#9a75ac] transition" >
+            На головну
+        </button>
+      </div>
+      
 
-       <button onClick={() => navigate("/")}
-       className="absolute top-4 right-6 bg-[#AD89BD] text-white px-4 py-2 rounded-full hover:bg-[#9a75ac] transition" >На головну</button>
-
-    
       <h1 className="mt-16">Hello admins</h1>
       <div className='flex space-x-6 m-10'>
-        {/*<button onClick={() => setSelectedText("Users")}>Users</button>*/}
+        <button onClick={() => setSelectedText("Users")}>Users</button>
         <button onClick={() => setSelectedText("News")}>News</button>
         <button onClick={() => setSelectedText("Comments")}>Comments</button>
         <button onClick={() => setSelectedText("Reports")}>Reports</button>
@@ -224,7 +277,7 @@ function AdminPage() {
       <div className="w-full flex justify-center items-center min-h-screen">
       {/* Таблиця користувачів */}
       {selectedText === "Users" && users && users.length > 0 ? (
-          <UserTable users={users} onSave={handleSaveUserData} />
+          <UserTable users={users} onCreate={createUser} onSave={handleSaveUserData} onDelete={handleDeleteUserData}/>
         ) : selectedText === "Users" ? (
           <p>Немає користувачів</p>
         ) : null

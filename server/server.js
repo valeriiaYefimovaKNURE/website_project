@@ -9,7 +9,7 @@ const corsOptions={
     origin:["http://localhost:5173"],  //client 
     methods: ["GET", "POST", "PUT", "DELETE"]
 }
-const { getAllUsers,updateUserData } = require("./lib/FirebaseUsers");
+const { getAllUsers,updateUserData, saveUserToBD, userSignIn, deleteUserData, createUser } = require("./lib/FirebaseUsers");
 const { getAllNews, updateNewsData, createNews, deleteNewsData}=require("./lib/FirebaseNews");
 const{ getAllComments, updateComment, createComment, deleteComment}=require("./lib/FirebaseComments");
 
@@ -44,6 +44,21 @@ app.get("/comments", async (req, res) => {
 })
 
 //створення
+app.post("/users", async(req,res)=>{
+  try{
+    const {userData, userId}=req.body;
+
+    if (!userData) {
+      return res.status(400).json({ error: "Немає даних користувача" });
+    }
+
+    const created=await createUser(userData, userId);
+    res.status(201).json(created);
+  }catch(error){
+    console.error("Сервер: Помилка створення користувача в БД", error.message);
+    res.status(500).json({ error: error.message });
+  }
+})
 app.post("/news", async(req,res)=>{
   try{
     const newsData=req.body;
@@ -74,6 +89,28 @@ app.post("/comments", async(req,res)=>{
     res.status(500).json({ error: error.message });
   }
 })
+app.post("/complete-registration", async(req,res)=>{
+  try{
+    const {email,login,name}=req.body;
+    const result= await saveUserToBD(email,login,name);
+
+    res.json({success:result});
+  }catch(error){
+    console.error("Сервер: Помилка збереження даних користувача до БД.", error.message);
+    res.status(500).json({ error: error.message });
+  }
+})
+app.post("/login",async(req,res)=>{
+  try{
+    const {userToken}=req.body;
+    const userData=await userSignIn(userToken);
+
+    res.json(userData);
+  }catch(error){
+    console.error("Login error:", error);
+    res.status(401).json({ error: "Unauthorized" });
+  }
+});
 
 //оновлення даних
 app.put("/comments/:newsId/:commentId", async (req,res)=>{
@@ -119,6 +156,19 @@ app.put("/news/:newsId", async (req,res)=>{
 })
 
 //видалення
+app.delete("/users/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    await deleteUserData(userId);
+
+    res.status(200).json({ success: true, message: "Новину успішно видалено" });
+  } catch (error) {
+    console.error("Сервер: Помилка при видаленні новини:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.delete("/news/:newsId", async (req, res) => {
   try {
     const { newsId } = req.params;

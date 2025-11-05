@@ -1,23 +1,17 @@
 import React from 'react'
 import BaseTable from './BaseTable'
 
-const UserTable = ({users,onSave, onCreate}) => {
+const UserTable = ({users,onSave, onCreate, onDelete}) => {
     const columns=[
         {key:'id', label:'ID'},
         { key: "imageUri", label: "Фото", editable: true },
         { key: "name", label: "Ім'я", editable: true },
         { key: "login", label: "Логін", editable: true },
         { key: "email", label: "Email", editable: true },
-        { key: "birthday", label: "Дата народження", editable: true },
-        { key: "gender", label: "Стать", editable: true, type:"select", options:["female","male","nebinary"] },
-        { key: "role", label: "Роль", editable: true, type:"select", options:["USER","EDITOR","ADMIN"] },
-        { key: "password", label: "Пароль", editable: true },
-        { key: "viper", label: "Viper", editable: true },
-        { key: "hasAgreedToTerms", label: "Terms", editable: true },
+        { key: "role", label: "Роль", editable: true, type:"select", options:["USER","EDITOR","ADMIN"] }
     ];
 
-
-    return <BaseTable columns={columns} data={users} onSave={onSave} onCreate={onCreate} tableType="users"/>;
+    return <BaseTable columns={columns} data={users} onSave={onSave} onCreate={onCreate} onDelete={onDelete} tableType="users"/>;
 };
  
 export default UserTable;

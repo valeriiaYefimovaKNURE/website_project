@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Select from "react-select";
 import images from '../../constants/images';
-import { formatToDisplay, formatToInput } from '../../../utils/dataUtils';
+import { formatToDisplay, formatToInput } from '../../utils/dataUtils';
 
 
 const BaseTable = ({ columns, data, onSave, onCreate, onDelete, tableType }) => {
