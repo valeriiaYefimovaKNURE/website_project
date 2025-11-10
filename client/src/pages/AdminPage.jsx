@@ -1,11 +1,12 @@
-import React, { useEffect, useState }from 'react'
-import axios from "axios"
+import React, { useEffect, useState, useCallback }from 'react'
 import UserTable from '../components/Tables/UserTable';
 import NewsTable from '../components/Tables/NewsTable';
 import CommentsTable from '../components/Tables/CommentsTable';
 import { useUser } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
-import { createAuth } from '../utils/auth';
+import {fetchComments,createComment, handleSaveCommentsData, handleDeleteCommentsData} from '../utils/firebase/comments';
+import { fetchNews, createNews, handleSaveNewsData, handleDeleteNewsData } from '../utils/firebase/news';
+import { fetchUsers, createUser, handleSaveUserData, handleDeleteUserData } from '../utils/firebase/users';
 
 function AdminPage() {
   const {user}=useUser();
@@ -15,236 +16,91 @@ function AdminPage() {
   const [news,setNews]=useState([]);
   const [comments, setComments]=useState([]);
 
+  const loadUsers = useCallback(async () => {
+    try {
+      const usersData = await fetchUsers();
+      setUsers(usersData);
+    } catch (error) {
+      console.error("Помилка завантаження користувачів:", error);
+    }
+  }, []);
+
+  const loadNews = useCallback(async () => {
+    try {
+      const newsData = await fetchNews();
+      setNews(newsData);
+    } catch (error) {
+      console.error("Помилка завантаження новин:", error);
+    }
+  }, []);
+
+  const loadComments = useCallback(async () => {
+    try {
+      const commentsData = await fetchComments();
+      setComments(commentsData);
+    } catch (error) {
+      console.error("Помилка завантаження коментарів:", error);
+    }
+  }, []);
+
+  const handleCreateUser = async (userData) => {
+    await createUser(userData);
+    await loadUsers();
+  };
+
+  const handleSaveUserData = async (row, updatedFields) => {
+    await handleSaveUserData(row, updatedFields);
+    await loadUsers();
+  };
+
+  const handleDeleteUserData = async (userId) => {
+    await handleDeleteUserData(userId);
+    await loadUsers();
+  };
+
+  const handleCreateNews = async (newsData) => {
+    await createNews(newsData);
+    await loadNews();
+  };
+
+  const handleSaveNewsData = async (row, updatedFields) => {
+    await handleSaveNewsData(row, updatedFields);
+    await loadNews();
+  };
+
+  const handleDeleteNewsData = async (id) => {
+    await handleDeleteNewsData(id);
+    await loadNews();
+  };
+
+  const handleCreateComment = async (commentData) => {
+    await createComment(commentData);
+    await loadComments();
+  };
+
+  const handleSaveCommentsData = async (row, updatedFields) => {
+    await handleSaveCommentsData(row, updatedFields);
+    await loadComments();
+  };
+
+  const handleDeleteCommentsData = async (id) => {
+    await handleDeleteCommentsData(id, comments);
+    await loadComments();
+  };
+
   useEffect(() => {
     if (!user) {
       navigate("/"); 
     }
   }, [user, navigate]);
 
-  const fetchUsers = async () => {
-    try {
-      const userInfo = await axios.get("http://localhost:8080/users");
-      setUsers(userInfo.data);
-    } catch (error) {
-      console.error("AdminPage / Помилка при завантаженні користувачів:", error);
-    }
-  };
-
-  const fetchNews = async () => {
-    try {
-      const newsInfo = await axios.get("http://localhost:8080/news");
-      setNews(newsInfo.data);
-    } catch (error) {
-      console.error("AdminPage / Помилка при завантаженні новин:", error);
-    }
-  };
-  const fetchComments = async () => {
-    try {
-      const commentsInfo = await axios.get("http://localhost:8080/comments");
-      
-      const formatted = commentsInfo.data.map(c => {
-        const firstReport = c.reports?.[0] || {};
-        return {
-          ...c,
-          reason: firstReport.reason || "",
-          status: firstReport.status || "",
-          time: firstReport.time || "",
-          reportId: firstReport.reportId || null,
-        };
-      });
-
-      setComments(formatted);
-    } catch (error) {
-      console.error("Помилка при завантаженні коментарів:", error);
-    }
-  };
-
-  const createUser=async(userData)=>{
-    try {
-      const userId=await createAuth(userData.email,"123456");
-
-      const response = await fetch("http://localhost:8080/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({userData, userId}),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Помилка при створенні користувача");
-      }
-
-      await fetchUsers();
-    } catch (error) {
-      console.error("createUser:", error.message);
-    }
-  }
-
-  const createNews=async(newsData)=>{
-    try {
-      const response = await fetch("http://localhost:8080/news", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newsData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Помилка при створенні новини");
-      }
-
-      const createdNews = await response.json();
-      console.log("Допис викладено:", createdNews);
-
-      await fetchNews();
-    } catch (error) {
-      console.error("createNews:", error.message);
-    }
-  }
-  const createComment=async(commentData)=>{
-    try {
-      const response = await fetch("http://localhost:8080/comments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(commentData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Помилка при створенні коментаря");
-      }
-
-      const createdComment = await response.json();
-      console.log("Коментарій створено:", createdComment);
-
-      await fetchComments();
-    } catch (error) {
-      console.error("createComment:", error.message);
-    }
-  }
-
-  const handleSaveUserData=async(row, updatedFields)=>{
-    try{
-      const userId=row.id;
-      if (!userId) throw new Error("Немає ID користувача(-ки) для оновлення");
-
-      const response=await fetch(`http://localhost:8080/users/${userId}`,{
-        method:"PUT",
-        headers:{
-          "Content-type":"application/json"
-        },
-        body:JSON.stringify(updatedFields)
-      })
-
-      if(!response.ok) throw new Error("Виникла помилка при оновленні даних користувача");
-      console.log(response);
-
-      await fetchUsers();
-    }catch(error){
-      console.error("handleSaveUserData(): Помилка при збереженні даних користувача:", error.message);
-    }
-  }
-
-  const handleSaveNewsData=async(row, updatedFields)=>{
-    try{
-      const newsId=row.id;
-      if (!newsId) throw new Error("Немає ID новини для оновлення");
-
-      const response=await fetch(`http://localhost:8080/news/${newsId}`,{
-        method:"PUT",
-        headers:{
-          "Content-type":"application/json"
-        },
-        body:JSON.stringify(updatedFields)
-      })
-
-      if(!response.ok) throw new Error("Виникла помилка при оновленні даних новини");
-      console.log(response);
-
-      await fetchNews();
-    }catch(error){
-      console.error("handleSaveNewsData(): Помилка при збереженні новини:", error.message);
-    }
-  }
-
-  const handleSaveCommentsData=async(row, updatedFields)=>{
-    try{
-      const newsId=row.news_id;
-      const commentId=row.id;
-
-      if (!newsId || !commentId) throw new Error("news_id або id коментаря відсутні!");
-
-      const response=await fetch(`http://localhost:8080/comments/${newsId}/${commentId}`,{
-        method:"PUT",
-        headers:{"Content-type":"application/json"},
-        body:JSON.stringify(updatedFields)
-      })
-      if(!response.ok) throw new Error("Не вдалося зберегти зміни щодо оновлення репорту на коментар");
-      console.log(response)
-
-      await fetchComments();
-    }catch(error){
-      console.error("handleSaveCommentsData(): Помилка при збереженні коментаря:", error.message);
-    }
-  }
-  
-  const handleDeleteUserData = async (userId) => {
-    try {
-      const response = await fetch(`http://localhost:8080/users/${userId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Помилка при видаленні новини");
-      await fetchUsers(); 
-    } catch (error) {
-      console.error("handleDeleteNewsData():", error.message);
-    }
-  };
-
-  const handleDeleteNewsData = async (id) => {
-    try {
-      const response = await fetch(`http://localhost:8080/news/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Помилка при видаленні новини");
-      await fetchNews(); 
-    } catch (error) {
-      console.error("handleDeleteNewsData():", error.message);
-    }
-  };
-
-  const handleDeleteCommentsData = async (id) => {
-    try {
-      if (!id) throw new Error("Немає ID коментаря для видалення");
-
-      const comment = comments.find(c => c.id === id);
-      if (!comment) throw new Error("Не знайдено коментар для видалення");
-      
-      const response = await fetch(`http://localhost:8080/comments/${comment.news_id}/${id}`,{ 
-        method: "DELETE" 
-      });
-
-      if (!response.ok) throw new Error("Помилка при видаленні коментаря");
-      
-      await fetchComments(); 
-    } catch (error) {
-      console.error("handleDeleteCommentsData():", error.message);
-      alert(error.message); 
-    }
-  };
-
   useEffect(() => {
     if (selectedText === "Users") {
-      fetchUsers();
+      loadUsers();
     } else if (selectedText === "News") {
-      fetchNews();
+      loadNews();
     } else if (selectedText === "Comments") {
-      fetchComments();
+      loadComments();
     }
   }, [selectedText]);
 
@@ -271,13 +127,13 @@ function AdminPage() {
         <button onClick={() => setSelectedText("Reports")}>Reports</button>
       
       </div>
-      <input className="border-1" type="search" placeholder="Пошук..." />
+      <input className="border" type="search" placeholder="Пошук..." />
       <h1>{selectedText}</h1>
 
       <div className="w-full flex justify-center items-center min-h-screen">
       {/* Таблиця користувачів */}
       {selectedText === "Users" && users && users.length > 0 ? (
-          <UserTable users={users} onCreate={createUser} onSave={handleSaveUserData} onDelete={handleDeleteUserData}/>
+          <UserTable users={users} onCreate={handleCreateUser} onSave={handleSaveUserData} onDelete={handleDeleteUserData}/>
         ) : selectedText === "Users" ? (
           <p>Немає користувачів</p>
         ) : null
@@ -289,7 +145,7 @@ function AdminPage() {
             news={news} 
             onSave={handleSaveNewsData} 
             onDelete={handleDeleteNewsData}
-            onCreate={createNews}
+            onCreate={handleCreateNews}
           />
         ) : selectedText === "News" ? (
           <p>Немає новин</p>
@@ -302,7 +158,7 @@ function AdminPage() {
             comments={comments} 
             onSave={handleSaveCommentsData} 
             onDelete={handleDeleteCommentsData}
-            onCreate={createComment}
+            onCreate={handleCreateComment}
           />
         ) : selectedText === "Comments" ? (
           <p>Немає коментарів до дописів</p>

@@ -1,11 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles/HomePage.css";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import { fetchNews } from "../utils/firebase/news";
 
 function HomePage() {
   const { user } = useUser();
   const navigate = useNavigate();
+
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadNews = async () => {
+      try {
+        const newsData = await fetchNews();
+        setNews(newsData);
+      } catch (err) {
+        console.error("Помилка завантаження новин:", err);
+        setError("Не вдалося завантажити новини");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadNews();
+  }, []);
 
   return (
     <>
