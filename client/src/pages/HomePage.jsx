@@ -3,6 +3,7 @@ import "../styles/HomePage.css";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { fetchNews } from "../utils/firebase/news";
+import NewsCard from "../components/Tables/NewsCard";
 
 function HomePage() {
   const { user } = useUser();
@@ -72,6 +73,37 @@ function HomePage() {
           <p className="news-intro_subtitle">
           Дізнавайтесь про найсвіжіші події та цікаві матеріали на нашій платформі! Не забудьте підписатися, і ми повідомимо вас про всі новини першими.
           </p>
+        </section>
+
+
+
+          {/* Секція з новинами */}
+          <section className="news-section">
+          {loading && (
+            <div className="news-loading">
+              <p>Завантаження новин...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="news-error">
+              <p>{error}</p>
+            </div>
+          )}
+
+          {!loading && !error && news.length === 0 && (
+            <div className="news-empty">
+              <p>Новин поки що немає</p>
+            </div>
+          )}
+
+          {!loading && !error && news.length > 0 && (
+            <div className="news-grid">
+              {news.map((item) => (
+                <NewsCard key={item.id} news={item} />
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </>

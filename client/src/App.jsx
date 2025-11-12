@@ -9,6 +9,8 @@ import AdminPage from './pages/AdminPage.jsx';
 import AuthorizationPage from './pages/AuthorizationPage.jsx'; 
 import { UserProvider } from './context/UserContext.jsx';
 import HomePage from './pages/HomePage.jsx';
+//import NewsDetailPage from './pages/NewsDetailPage.jsx';
+
 
 const router = createBrowserRouter([
   {
@@ -24,6 +26,13 @@ const router = createBrowserRouter([
     path: "auth",
     element: <AuthorizationPage />,
   },
+
+  //{
+   // path: "news/:id",
+   // element: <NewsDetailPage />,
+ // },
+
+
 ]);
 
 createRoot(document.getElementById('root')).render(

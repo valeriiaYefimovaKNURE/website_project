@@ -1,32 +1,38 @@
-import React from 'react';
-import '../styles/NewsCard.css';
+import { useNavigate } from "react-router-dom";
+import "../../styles/NewsCard.css"; 
+import { formatToDisplay } from "../../utils/dataUtils";
 
-function NewsCard({ title, subtitle, text, imageUri, creatorName, date, link }) {
+function NewsCard({ news }) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/news/${news.id}`);
+  };
+
   return (
-    <div className="news-card">
-      {/* Фото новини */}
-      {imageUri && <img src={imageUri} alt={title} className="news-card_image" />}
-
-      {/* Контент */}
-      <div className="news-card_content">
-        <h2 className="news-card_title">{title}</h2>
-        <p className="news-card_subtitle">{subtitle}</p>
-
-        {/* Приховане поле text для детальної сторінки */}
-        <div style={{ display: 'none' }}>{text}</div>
-
-        <p className="news-card_meta">
-          {creatorName} — {date}
-        </p>
-
-        {link && (
-          <button
-            className="news-card_button"
-            onClick={() => window.location.href = link}
-          >
-            Детальніше
-          </button>
+    <div className="news-card" onClick={handleCardClick}>
+      <div className="news-card__image-wrapper">
+        <img 
+          src={news.imageUri || "placeholder.jpg"} 
+          alt={news.title}
+          className="news-card__image"
+        />
+        {news.theme && (
+          <span className="news-card__category">{news.theme}</span>
         )}
+      </div>
+      
+      <div className="news-card__content">
+        <h3 className="news-card__title">{news.title}</h3>
+        <p className="news-card__description">
+          {news.subtitle?.substring(0, 100)}
+          {news.subtitle?.length > 100 ? "..." : ""}
+        </p>
+        <div className="news-card__footer">
+        <span className="news-card__date">
+            { news.date || '' }
+          </span>
+        </div>
       </div>
     </div>
   );
