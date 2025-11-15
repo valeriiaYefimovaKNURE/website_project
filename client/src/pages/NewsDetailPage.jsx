@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchNewsById } from '../utils/firebase/news';
-import { fetchCommentsByNewsId, addComment } from '../utils/firebase/comments';
+import { fetchCommentsByNewsId, createComment } from '../utils/firebase/comments';
 import { useUser } from '../context/UserContext';
 import '../styles/NewsDetailPage.css';
 
@@ -30,6 +30,7 @@ const NewsDetailPage = () => {
 
         const commentsData = await fetchCommentsByNewsId(id);
         setComments(commentsData);
+        //setComments([]);
       } catch (err) {
         console.error("Помилка завантаження:", err);
         setError("Не вдалося завантажити дані");
@@ -60,13 +61,19 @@ const NewsDetailPage = () => {
     try {
       const comment = {
         text: newComment,
-        user_login: user.email || user.name || "Анонім",
+        user_login: user.login || user.name || user.email || "Анонім",
         date: new Date().toLocaleDateString('uk-UA'),
         status: "pending",
-        newsId: id
+        news_id: id,
+        user_uid: user.id,
+        hasReport: false
       };
-      
-      const newCommentId = await addComment(comment);
+      console.log("Sending comment:", user); 
+
+
+      //const newCommentId = await addComment(comment);
+      const newCommentId = await createComment(comment);
+
       setComments([...comments, { ...comment, id: newCommentId }]);
       setNewComment("");
     } catch (err) {

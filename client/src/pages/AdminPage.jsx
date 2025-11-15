@@ -43,47 +43,49 @@ function AdminPage() {
     }
   }, []);
 
-  const handleCreateUser = async (userData) => {
+
+
+  const OnCreateUser = async (userData) => {
     await createUser(userData);
     await loadUsers();
   };
 
-  const handleSaveUserData = async (row, updatedFields) => {
+  const OnSaveUserData = async (row, updatedFields) => {
     await handleSaveUserData(row, updatedFields);
     await loadUsers();
   };
 
-  const handleDeleteUserData = async (userId) => {
+  const OnDeleteUserData = async (userId) => {
     await handleDeleteUserData(userId);
     await loadUsers();
   };
 
-  const handleCreateNews = async (newsData) => {
+  const OnCreateNews = async (newsData) => {
     await createNews(newsData);
     await loadNews();
   };
 
-  const handleSaveNewsData = async (row, updatedFields) => {
+  const OnSaveNewsData = async (row, updatedFields) => {
     await handleSaveNewsData(row, updatedFields);
     await loadNews();
   };
 
-  const handleDeleteNewsData = async (id) => {
+  const OnDeleteNewsData = async (id) => {
     await handleDeleteNewsData(id);
     await loadNews();
   };
 
-  const handleCreateComment = async (commentData) => {
+  const OnCreateComment = async (commentData) => {
     await createComment(commentData);
     await loadComments();
   };
 
-  const handleSaveCommentsData = async (row, updatedFields) => {
+  const OnSaveCommentsData = async (row, updatedFields) => {
     await handleSaveCommentsData(row, updatedFields);
     await loadComments();
   };
 
-  const handleDeleteCommentsData = async (id) => {
+  const OnDeleteCommentsData = async (id) => {
     await handleDeleteCommentsData(id, comments);
     await loadComments();
   };
@@ -133,7 +135,7 @@ function AdminPage() {
       <div className="w-full flex justify-center items-center min-h-screen">
       {/* Таблиця користувачів */}
       {selectedText === "Users" && users && users.length > 0 ? (
-          <UserTable users={users} onCreate={handleCreateUser} onSave={handleSaveUserData} onDelete={handleDeleteUserData}/>
+          <UserTable users={users} onCreate={OnCreateUser} onSave={OnSaveUserData} onDelete={OnDeleteUserData}/>
         ) : selectedText === "Users" ? (
           <p>Немає користувачів</p>
         ) : null
@@ -143,9 +145,9 @@ function AdminPage() {
       {selectedText === "News" && news && news.length > 0 ? (
           <NewsTable 
             news={news} 
-            onSave={handleSaveNewsData} 
-            onDelete={handleDeleteNewsData}
-            onCreate={handleCreateNews}
+            onSave={OnSaveNewsData} 
+            onDelete={OnDeleteNewsData}
+            onCreate={OnCreateNews}
           />
         ) : selectedText === "News" ? (
           <p>Немає новин</p>
@@ -156,9 +158,9 @@ function AdminPage() {
       {selectedText === 'Comments' && comments && comments.length > 0 ? (
           <CommentsTable 
             comments={comments} 
-            onSave={handleSaveCommentsData} 
-            onDelete={handleDeleteCommentsData}
-            onCreate={handleCreateComment}
+            onSave={OnSaveCommentsData} 
+            onDelete={OnDeleteCommentsData}
+            onCreate={OnCreateComment}
           />
         ) : selectedText === "Comments" ? (
           <p>Немає коментарів до дописів</p>
