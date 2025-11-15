@@ -10,8 +10,8 @@ const corsOptions={
     methods: ["GET", "POST", "PUT", "DELETE"]
 }
 const { getAllUsers,updateUserData, saveUserToBD, userSignIn, deleteUserData, createUser } = require("./lib/FirebaseUsers");
-const { getAllNews, updateNewsData, createNews, deleteNewsData}=require("./lib/FirebaseNews");
-const{ getAllComments, updateComment, createComment, deleteComment}=require("./lib/FirebaseComments");
+const { getAllNews, getNewsById, updateNewsData, createNews, deleteNewsData}=require("./lib/FirebaseNews");
+const{ getAllComments, getCommentsByNewsId, updateComment, createComment, deleteComment}=require("./lib/FirebaseComments");
 
 const PORT = 8080;
 app.use(cors(corsOptions));
@@ -37,6 +37,32 @@ app.get("/news", async (req, res) => {
 app.get("/comments", async (req, res) => {
   try {
     const comments=await getAllComments();
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.get("/news/:newsId", async (req, res) => {
+  try {
+    const { newsId } = req.params;
+    const newsItem = await getNewsById(newsId);
+
+    if (!newsItem) {
+      return res.status(404).json({ error: "Новину не знайдено" });
+    }
+
+    res.json(newsItem);
+  } catch (error) {
+    console.error("Сервер: Помилка при отриманні новини:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/comments/:newsId", async (req, res) => {
+  try {
+    const { newsId } = req.params;
+    const comments=await getCommentsByNewsId(newsId);
     res.json(comments);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -164,7 +190,7 @@ app.delete("/users/:userId", async (req, res) => {
 
     res.status(200).json({ success: true, message: "Новину успішно видалено" });
   } catch (error) {
-    console.error("Сервер: Помилка при видаленні новини:", error.message);
+    console.error("Сервер: Помилка при видаленні користувача:", error.message);
     res.status(500).json({ error: error.message });
   }
 });
