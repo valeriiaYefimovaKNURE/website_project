@@ -41,6 +41,41 @@ const getAllComments=async()=>{
     }
 }
 
+const getCommentsByNewsId=async(newsId)=>{
+    try{
+        if (!newsId) throw new Error("newsId відсутнє");
+        const allNews = await getAllNews();
+        if (!allNews || !Array.isArray(allNews)) {
+            throw new Error("Дані про новини невалідні");
+        }
+
+        const news = allNews.find(n => n.id === newsId);
+        if (!news || !news.commentsArray) return [];
+
+        const comments = Object.entries(news.commentsArray).map(([commentId, comment]) => ({
+            id: commentId,
+            text: comment.text || "Без тексту",
+            user_uid: comment.user_uid || "Невідомий UID",
+            user_login: comment.user_login || "Анонім",
+            user_name: comment.user_name || "Невідоме ім'я",
+            news_id: news.id,
+            date: comment.date || "Невідома дата",
+            hasReport: comment.reports ? true : false,
+            reports: comment.reports
+            ? Object.entries(comment.reports).map(([reportId, report]) => ({
+                reportId,
+                ...report
+            }))
+            : [],
+        }));
+        return comments;
+    }catch{
+        console.error("FirebaseComments.js / getCommentsByNewsId():", error.message);
+        return [];
+    }
+}
+
+
 const updateComment=async(newsId, commentId, updatedFields)=>{
     try{
         if (!newsId || !commentId) throw new Error("newsId або commentId відсутні");
@@ -132,4 +167,4 @@ const updateCommentReport=async(newsId, commentId, updatedFields)=>{
     }
 }
 
-module.exports = {getAllComments, updateComment, createComment, deleteComment, getReportedComments, updateCommentReport};
+module.exports = {getAllComments,getCommentsByNewsId, updateComment, createComment, deleteComment, getReportedComments, updateCommentReport};

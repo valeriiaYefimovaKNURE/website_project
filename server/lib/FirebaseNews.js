@@ -18,6 +18,24 @@ const getAllNews=async()=>{
         throw new Error("Не вдалось завантажити новини");
     }
 }
+
+const getNewsById = async(newsId)=>{
+    try{
+        const ref = database.ref(`/News/${newsId}`);
+        const snapshot = await ref.once("value");
+        const data = snapshot.val();
+
+        if (!data) {
+            throw new Error(`Новину з ID ${newsId} не знайдено`);
+        }
+
+        return { id: newsId, ...data };
+    }catch(error){
+        console.error("FirebaseNews.js / getNewsById() : Помилка при отриманні данних про новину.")
+        throw new Error("Не вдалось завантажити новину");
+    }
+}
+
 const createNews=async(newsData)=>{
     try{
         const ref=database.ref("/News").push();
@@ -68,4 +86,4 @@ const deleteNewsData = async (newsId) => {
 
 
 
-module.exports = { getAllNews, createNews, updateNewsData,deleteNewsData};
+module.exports = { getAllNews, getNewsById, createNews, updateNewsData,deleteNewsData};
