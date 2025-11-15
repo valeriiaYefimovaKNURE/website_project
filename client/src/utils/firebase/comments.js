@@ -22,6 +22,28 @@ export const fetchComments = async () => {
     }
 };
 
+export const fetchCommentsByNewsId = async (id) => {
+   try{
+     const { data } = await axios.get(`http://localhost:8080/comments/${id}`);
+
+    return data.map(comment => {
+      const [report = {}] = comment.reports || [];
+
+      return {
+        ...comment,
+        reason: report.reason ?? "",
+        status: report.status ?? "",
+        time: report.time ?? "",
+        reportId: report.reportId ?? null,
+      };
+    });
+
+  }catch(error){
+    console.error(" / Помилка при завантаженні коментарів новини:", error);
+    return [];
+  }
+};
+
 export const createComment=async(commentData)=>{
     try {
       const response = await fetch("http://localhost:8080/comments", {

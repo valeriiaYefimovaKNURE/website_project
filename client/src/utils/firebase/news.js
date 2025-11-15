@@ -10,6 +10,17 @@ export const fetchNews = async () => {
     }
   };
 
+export const fetchNewsById = async(id) => {
+  try{
+    // if (!id ) throw new Error("news_id відсутнє!");
+     const response = await axios.get(`http://localhost:8080/news/${id}`);
+    return response.data;
+  }catch(error){
+    console.error("AdminPage / Помилка при завантаженні новини:", error);
+    return null;
+  }
+};
+
 export const createNews=async(newsData)=>{
     try {
       const response = await fetch("http://localhost:8080/news", {
