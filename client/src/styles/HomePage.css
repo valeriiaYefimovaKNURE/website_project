@@ -12,6 +12,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
+  margin-top: 40px;
 }
 
 .hero-text_title {
@@ -44,7 +45,7 @@
 .news-intro {
   text-align: center;
   max-width: 800px;
-  margin: 3rem auto 2rem auto;
+  margin: 5rem auto 2rem auto;
   padding: 0 1rem;
 }
 

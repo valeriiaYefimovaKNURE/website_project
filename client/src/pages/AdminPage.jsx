@@ -1,20 +1,22 @@
-import React, { useEffect, useState, useCallback }from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import UserTable from '../components/Tables/UserTable';
 import NewsTable from '../components/Tables/NewsTable';
 import CommentsTable from '../components/Tables/CommentsTable';
 import { useUser } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
-import {fetchComments,createComment, handleSaveCommentsData, handleDeleteCommentsData} from '../utils/firebase/comments';
+import { fetchComments, createComment, handleSaveCommentsData, handleDeleteCommentsData } from '../utils/firebase/comments';
 import { fetchNews, createNews, handleSaveNewsData, handleDeleteNewsData } from '../utils/firebase/news';
 import { fetchUsers, createUser, handleSaveUserData, handleDeleteUserData } from '../utils/firebase/users';
+import '../styles/AdminPage.css'; 
 
 function AdminPage() {
-  const {user}=useUser();
-  const navigate=useNavigate();
-  const [selectedText, setSelectedText] = useState("")
+  const { user } = useUser();
+  const navigate = useNavigate();
+  const [selectedText, setSelectedText] = useState("Users");
   const [users, setUsers] = useState([]);
-  const [news,setNews]=useState([]);
-  const [comments, setComments]=useState([]);
+  const [news, setNews] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadUsers = useCallback(async () => {
     try {
@@ -42,8 +44,6 @@ function AdminPage() {
       console.error("Помилка завантаження коментарів:", error);
     }
   }, []);
-
-
 
   const OnCreateUser = async (userData) => {
     await createUser(userData);
@@ -92,7 +92,7 @@ function AdminPage() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/"); 
+      navigate("/");
     }
   }, [user, navigate]);
 
@@ -104,72 +104,148 @@ function AdminPage() {
     } else if (selectedText === "Comments") {
       loadComments();
     }
-  }, [selectedText]);
+  }, [selectedText, loadUsers, loadNews, loadComments]);
 
-  
   if (!user) {
-    return <h1>Loading..</h1>;
+    return (
+      <div className="admin-loading">
+        <h1 className="admin-loading-text">Завантаження...</h1>
+      </div>
+    );
   }
+
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
-    <div className="flex flex-col items-center w-full m-2">
-      <div className=''>
-        <p className='absolute top-4 left-6'>{user.name} ― {user.login}</p>
-        <button onClick={() => navigate("/")}
-          className="absolute top-4 right-6 bg-[#AD89BD] text-white px-4 py-2 rounded-full hover:bg-[#9a75ac] transition" >
-            На головну
+    <div className="admin-page">
+      <div className="admin-header">
+        <div className="admin-user-info">
+          <div className="admin-user-avatar">
+            {getInitials(user.name)}
+          </div>
+          <span>
+            <strong>{user.name}</strong> - {user.login}
+          </span>
+        </div>
+        <button onClick={() => navigate("/")} className="btn-home">
+          На головну
         </button>
       </div>
-      
 
-      <h1 className="mt-16">Hello admins</h1>
-      <div className='flex space-x-6 m-10'>
-        <button onClick={() => setSelectedText("Users")}>Users</button>
-        <button onClick={() => setSelectedText("News")}>News</button>
-        <button onClick={() => setSelectedText("Comments")}>Comments</button>
-        <button onClick={() => setSelectedText("Reports")}>Reports</button>
-      
-      </div>
-      <input className="border" type="search" placeholder="Пошук..." />
-      <h1>{selectedText}</h1>
+      <div className="admin-content">
+        <h1 className="admin-title">Панель адміністратора</h1>
 
-      <div className="w-full flex justify-center items-center min-h-screen">
-      {/* Таблиця користувачів */}
-      {selectedText === "Users" && users && users.length > 0 ? (
-          <UserTable users={users} onCreate={OnCreateUser} onSave={OnSaveUserData} onDelete={OnDeleteUserData}/>
-        ) : selectedText === "Users" ? (
-          <p>Немає користувачів</p>
-        ) : null
-      }
+        <div className="admin-tabs">
+          <button
+            onClick={() => setSelectedText("Users")}
+            className={`admin-tab ${selectedText === "Users" ? "active" : ""}`}
+          >
+            👥 Користувачі
+          </button>
+          <button
+            onClick={() => setSelectedText("News")}
+            className={`admin-tab ${selectedText === "News" ? "active" : ""}`}
+          >
+            📰 Новини
+          </button>
+          <button
+            onClick={() => setSelectedText("Comments")}
+            className={`admin-tab ${selectedText === "Comments" ? "active" : ""}`}
+          >
+            💬 Коментарі
+          </button>
+          <button
+            onClick={() => setSelectedText("Reports")}
+            className={`admin-tab ${selectedText === "Reports" ? "active" : ""}`}
+          >
+            🚨 Скарги
+          </button>
+        </div>
 
-      {/* Таблиця Новин */}
-      {selectedText === "News" && news && news.length > 0 ? (
-          <NewsTable 
-            news={news} 
-            onSave={OnSaveNewsData} 
-            onDelete={OnDeleteNewsData}
-            onCreate={OnCreateNews}
+        <div className="admin-search-container">
+          <input
+            className="admin-search"
+            type="search"
+            placeholder="🔍 Пошук..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
-        ) : selectedText === "News" ? (
-          <p>Немає новин</p>
-        ) : null
-      }
+        </div>
 
-      {/* Таблиця Коментарі */}
-      {selectedText === 'Comments' && comments && comments.length > 0 ? (
-          <CommentsTable 
-            comments={comments} 
-            onSave={OnSaveCommentsData} 
-            onDelete={OnDeleteCommentsData}
-            onCreate={OnCreateComment}
-          />
-        ) : selectedText === "Comments" ? (
-          <p>Немає коментарів до дописів</p>
-        ) : null
-      }
+        {selectedText && (
+          <h2 className="admin-section-title">
+            {selectedText === "Users" && "Управління користувачами"}
+            {selectedText === "News" && "Управління новинами"}
+            {selectedText === "Comments" && "Управління коментарями"}
+            {selectedText === "Reports" && "Управління скаргами"}
+          </h2>
+        )}
+
+        <div className="admin-table-container">
+        
+          {selectedText === "Users" && (
+            users && users.length > 0 ? (
+              <UserTable
+                users={users}
+                onCreate={OnCreateUser}
+                onSave={OnSaveUserData}
+                onDelete={OnDeleteUserData}
+              />
+            ) : (
+              <div className="admin-empty-state">
+                <p className="admin-empty-text">Немає користувачів</p>
+              </div>
+            )
+          )}
+
+          {selectedText === "News" && (
+            news && news.length > 0 ? (
+              <NewsTable
+                news={news}
+                onSave={OnSaveNewsData}
+                onDelete={OnDeleteNewsData}
+                onCreate={OnCreateNews}
+              />
+            ) : (
+              <div className="admin-empty-state">
+                <p className="admin-empty-text">Немає новин</p>
+              </div>
+            )
+          )}
+
       
+          {selectedText === "Comments" && (
+            comments && comments.length > 0 ? (
+              <CommentsTable
+                comments={comments}
+                onSave={OnSaveCommentsData}
+                onDelete={OnDeleteCommentsData}
+                onCreate={OnCreateComment}
+              />
+            ) : (
+              <div className="admin-empty-state">
+                <p className="admin-empty-text">Немає коментарів до дописів</p>
+              </div>
+            )
+          )}
+
+        
+          {selectedText === "Reports" && (
+            <div className="admin-empty-state">
+              <p className="admin-empty-text">Функціонал скарг поки що в розробці</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default AdminPage
+export default AdminPage;

@@ -1,0 +1,179 @@
+.admin-page {
+    min-height: 100vh;
+    width: 100%;
+  }
+  
+
+.admin-header {
+    position: fixed;    
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: white;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    z-index: 9999;     
+  }
+  
+.admin-user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #4b5563;
+    font-size: 0.95rem;
+  }
+  
+.admin-user-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d584be 0%, rgb(200, 97, 234) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+  }
+  
+.btn-home {
+    padding: 0.625rem 1.5rem;
+    color: rgb(18, 17, 17);
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  }
+  
+.btn-home:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
+  }
+  
+
+.admin-content {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+.admin-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #8d70c0 0%, #b067bb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-top: 11rem;
+    margin-bottom: 6rem;
+  }
+  
+
+.admin-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  
+.admin-tab {
+    padding: 0.75rem 2rem;
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+.admin-tab:hover {
+    border-color: #e9d5ff;
+    transform: translateY(-2px);
+  }
+  
+.admin-tab.active {
+    background: linear-gradient(135deg, #a076a7 0%, #c57ec4 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  }
+  
+.admin-search-container {
+    max-width: 32rem;
+    margin: 0 auto 2rem;
+  }
+  
+.admin-search {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 9999px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+.admin-search:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+  }
+  
+.admin-search::placeholder {
+    color: #9ca3af;
+  }
+  
+ 
+.admin-section-title {
+    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 1.5rem;
+  }
+  
+  
+  .admin-table-container {
+    min-height: 400px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  
+  .admin-loading-container,
+  .admin-empty-container {
+    width: 100%;
+    
+    text-align: center;
+  }
+  
+  .admin-empty-text {
+    font-size: 18px;
+    color: #666;
+    margin: 0;
+  }
+
+
+.admin-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f3e7ff 0%, #fce7f3 50%, #dbeafe 100%);
+  }
+  
+.admin-loading-text {
+    font-size: 1.5rem;
+    color: #7c3aed;
+    font-weight: 500;
+  }
+
+

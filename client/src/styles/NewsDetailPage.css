@@ -1,12 +1,12 @@
 
 .news-detail-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #f3e7ff 0%, #fce7f3 50%, #dbeafe 100%);
+    
     padding: 2rem 0;
   }
   
   .news-detail-container {
-    max-width: 48rem;
+    max-width: 68rem;
     margin: 0 auto;
     background: white;
     border-radius: 1.5rem;
@@ -38,12 +38,12 @@
   }
   
   .icon-back {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 3rem ;
+    height: 3rem ;
     color: #7c3aed;
   }
   
-  /* Image */
+ 
   .news-detail-image {
     position: relative;
     width: 100%;
@@ -57,12 +57,12 @@
     object-fit: cover;
   }
   
-  /* Content */
+ 
   .news-detail-content {
     padding: 1.5rem;
   }
   
-  /* Meta */
+  
   .news-meta {
     display: flex;
     align-items: center;
@@ -127,7 +127,7 @@
     font-size: 0.875rem;
   }
   
-  /* Stats */
+
   .news-stats {
     display: flex;
     align-items: center;
@@ -166,13 +166,22 @@
     height: 1.5rem;
     color: #9ca3af;
   }
-  
+   
   .stat-item span {
     font-weight: 500;
     color: #374151;
   }
   
-  /* Title */
+
+  .stat-item:focus {
+    outline: none;
+  }
+
+  .stat-item:focus-visible {
+    outline: none;
+  }
+
+ 
   .news-title {
     font-size: 1.875rem;
     font-weight: bold;
@@ -181,7 +190,7 @@
     line-height: 1.2;
   }
   
-  /* Author */
+ 
   .news-author {
     margin-bottom: 1.5rem;
   }
@@ -218,7 +227,7 @@
     color: #1f2937;
   }
   
-  /* Description */
+
   .news-description {
     margin-bottom: 2rem;
   }
@@ -235,7 +244,7 @@
     white-space: pre-line;
   }
   
-  /* Link */
+ 
   .news-link {
     margin-bottom: 2rem;
   }
@@ -250,7 +259,7 @@
     color: #6d28d9;
   }
   
-  /* Comments */
+  
   .comments-section {
     border-top: 1px solid #e5e7eb;
     padding-top: 1.5rem;
@@ -335,7 +344,7 @@
     line-height: 1.5;
   }
   
-  /* Comment Form */
+
   .comment-form {
     background: #f9fafb;
     border-radius: 1rem;
@@ -395,7 +404,7 @@
     height: 1rem;
   }
   
-  /* Loading and Error states */
+
   .news-detail-loading,
   .news-detail-error {
     min-height: 100vh;
@@ -435,7 +444,7 @@
     background: #6d28d9;
   }
   
-  /* Responsive */
+
   @media (max-width: 768px) {
     .news-detail-page {
       padding: 1rem;

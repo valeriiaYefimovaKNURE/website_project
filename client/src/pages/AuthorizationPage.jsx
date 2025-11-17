@@ -3,6 +3,7 @@ import { createAuth, getAuthToken, resendEmailVerification } from "../utils/auth
 import { useUser } from "../context/UserContext";
 import { validateForm, validateLoginForm } from "../utils/formValidation";
 import { useNavigate } from "react-router-dom";
+import BackButton from "../components/BackButton";
 
 export default function AuthorizationPage() {
   const {setUser}=useUser();
@@ -101,11 +102,12 @@ export default function AuthorizationPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center  font-poppins">
-      <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center  font-poppins px-20">
+
+      <BackButton to="/" /> 
+      <div className="bg-white rounded-2xl p-20 w-full max-w-[800px] shadow-2xl">
         
-        {/* Заголовок */}
-        <h2 className="text-3xl font-semibold text-center mb-6">
+        <h2 className="text-3xl font-semibold text-center mb-11">
           {isLogin ? "Вхід" : "Реєстрація"}
         </h2>
 
@@ -133,7 +135,7 @@ export default function AuthorizationPage() {
             </button>
           </div>
         ) :isLogin ? (
-          <form className="flex flex-col space-y-4">
+          <form className="flex flex-col space-y-5 w-full min-w-[18rem] ">
             {message && (
               <p className="text-2xl font-semibold text-center mb-6" >{message}</p>
             )}
@@ -161,7 +163,7 @@ export default function AuthorizationPage() {
             >
               {isSubmitting ? "Завантаження..." : "Увійти"}
             </button>
-            <div className="text-center mt-2 text-gray-700 flex flex-row items-center">
+            <div className="text-center mt-2 text-gray-700 flex flex-row items-center justify-center mt-6">
                Не маєте акаунт?{" "}
               <a
                 className="text-blue-600 hover:underline font-medium ml-2"
@@ -172,32 +174,32 @@ export default function AuthorizationPage() {
             </div>
           </form>
         ) : (
-          <form className="flex flex-col space-y-4">
+          <form className="flex flex-col space-y-5 w-full min-w-[18rem]">
             <input
               type="text"
               placeholder="Ім'я"
-              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 "
+              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
               onChange={(e)=>setForm({...form,name:e.target.value})}
               value={form.name}
             />
             <input
               type="text"
               placeholder="Логін"
-              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 "
+              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 "
               onChange={(e)=>setForm({...form,login:e.target.value})}
               value={form.login}
             />
             <input
               type="text"
               placeholder="Email"
-              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 "
+              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 "
               onChange={(e)=>setForm({...form,email:e.target.value})}
               value={form.email}
             />
             <input
               type="password"
               placeholder="Пароль"
-              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
               onChange={(e)=>setForm({...form,password:e.target.value})}
               value={form.password}
             />
@@ -206,7 +208,7 @@ export default function AuthorizationPage() {
             >
               {isSubmitting ? "Завантаження..." : "Зареєструватися"}
             </button>
-            <div className="text-center mt-2 text-gray-700 flex flex-row items-center ">
+            <div className="text-center mt-5 text-gray-700 flex flex-row items-center justify-center ">
               Вже маєте акаунт?{" "}
               <a
                 className="text-blue-600 hover:underline font-medium ml-2"

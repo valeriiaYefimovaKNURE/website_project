@@ -122,22 +122,21 @@ const NewsDetailPage = () => {
       <div className="news-detail-container">
         <div className="news-detail-header">
           <button onClick={() => navigate('/')} className="btn-back">
-            <svg className="icon-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+          <svg className="icon-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"> 
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
           </button>
         </div>
 
-        {/* Image */}
+        
         {article.imageUri && (
           <div className="news-detail-image">
             <img src={article.imageUri} alt={article.title} />
           </div>
         )}
 
-        {/* Content */}
         <div className="news-detail-content">
-          {/* Theme and Date */}
+       
           <div className="news-meta">
             {article.theme && (
               <span className={`theme-badge ${getThemeClass(article.theme)}`}>
@@ -147,7 +146,7 @@ const NewsDetailPage = () => {
             <span className="news-date">{article.date}</span>
           </div>
 
-          {/* Stats */}
+         
           <div className="news-stats">
             <button 
               onClick={handleLike}
@@ -166,10 +165,10 @@ const NewsDetailPage = () => {
             </div>
           </div>
 
-          {/* Title */}
+       
           <h1 className="news-title">{article.title}</h1>
 
-          {/* Author */}
+         
           {article.creatorName && (
             <div className="news-author">
               <p className="author-label">Автор(-ка)</p>
@@ -182,7 +181,7 @@ const NewsDetailPage = () => {
             </div>
           )}
 
-          {/* Description */}
+          
           {article.subtitle && (
             <div className="news-description">
               <p className="description-label">Опис</p>
@@ -190,7 +189,7 @@ const NewsDetailPage = () => {
             </div>
           )}
 
-          {/* Link */}
+       
           {article.link && (
             <div className="news-link">
               <a href={article.link} target="_blank" rel="noopener noreferrer">
@@ -199,11 +198,11 @@ const NewsDetailPage = () => {
             </div>
           )}
 
-          {/* Comments Section */}
+         
           <div className="comments-section">
             <h2 className="comments-title">Коментарі ({comments.length})</h2>
 
-            {/* Comments List */}
+        
             <div className="comments-list">
               {comments.length === 0 ? (
                 <p className="comments-empty">Коментарів поки немає. Будьте першим!</p>
@@ -228,7 +227,7 @@ const NewsDetailPage = () => {
               )}
             </div>
 
-            {/* Add Comment */}
+           
             <div className="comment-form">
               <textarea
                 value={newComment}
