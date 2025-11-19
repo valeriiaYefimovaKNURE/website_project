@@ -16,6 +16,8 @@ const NewsDetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [viewersCount, setViewersCount] = useState(0);
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -30,7 +32,6 @@ const NewsDetailPage = () => {
 
         const commentsData = await fetchCommentsByNewsId(id);
         setComments(commentsData);
-        //setComments([]);
       } catch (err) {
         console.error("Помилка завантаження:", err);
         setError("Не вдалося завантажити дані");
@@ -40,6 +41,55 @@ const NewsDetailPage = () => {
     };
 
     loadData();
+  }, [id]);
+
+  //  (WebSocket)
+
+  useEffect(() => {
+    let ws;
+
+    try {
+      ws = new WebSocket("wss://alyssa-unpeevish-unchicly.ngrok-free.dev ");
+      ws.onopen = () => {
+        console.log("WebSocket підключено успішно");
+        ws.send(JSON.stringify({ type: "join", data: { news_id: id } }));
+      };
+
+      ws.onerror = (event) => {
+        console.error("WebSocket closed:", event);
+      };
+
+      ws.onclose = (event) => {
+        console.log("WebSocket закрито", event.code, event.reason);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+  
+          // Оновлюємо кількість глядачів
+          if (message.type === "viewers_count" && message.data.news_id === id) {
+            setViewersCount(message.data.count);
+          }
+          // Оновлюємо коментарі
+          if (message.type === "new_comment") {
+            const comment = message.data;
+
+            if (comment.news_id === id) {
+              setComments(prev => [...prev, comment]);
+            }
+          }
+        } catch (err) {
+          console.error("Помилка обробки повідомлення WS:", err);
+        }
+      };
+    } catch (err) {
+      console.error("Не вдалося створити WebSocket:", err);
+    }
+
+    return () => {
+      if (ws) ws.close();
+    };
   }, [id]);
 
   const handleLike = () => {
@@ -74,7 +124,7 @@ const NewsDetailPage = () => {
       //const newCommentId = await addComment(comment);
       const newCommentId = await createComment(comment);
 
-      setComments([...comments, { ...comment, id: newCommentId }]);
+    //  setComments([...comments, { ...comment, id: newCommentId }]);
       setNewComment("");
     } catch (err) {
       console.error("Помилка додавання коментаря:", err);
@@ -122,21 +172,22 @@ const NewsDetailPage = () => {
       <div className="news-detail-container">
         <div className="news-detail-header">
           <button onClick={() => navigate('/')} className="btn-back">
-          <svg className="icon-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"> 
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <svg className="icon-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
           </button>
         </div>
 
-        
+        {/* Image */}
         {article.imageUri && (
           <div className="news-detail-image">
             <img src={article.imageUri} alt={article.title} />
           </div>
         )}
 
+        {/* Content */}
         <div className="news-detail-content">
-       
+          {/* Theme and Date */}
           <div className="news-meta">
             {article.theme && (
               <span className={`theme-badge ${getThemeClass(article.theme)}`}>
@@ -146,7 +197,7 @@ const NewsDetailPage = () => {
             <span className="news-date">{article.date}</span>
           </div>
 
-         
+          {/* Stats */}
           <div className="news-stats">
             <button 
               onClick={handleLike}
@@ -163,12 +214,14 @@ const NewsDetailPage = () => {
               </svg>
               <span>{comments.length}</span>
             </div>
+            <p>Зараз переглядають: {viewersCount} {viewersCount === 1 ? "особа" : "осіб"}</p>
+
           </div>
 
-       
+          {/* Title */}
           <h1 className="news-title">{article.title}</h1>
 
-         
+          {/* Author */}
           {article.creatorName && (
             <div className="news-author">
               <p className="author-label">Автор(-ка)</p>
@@ -181,7 +234,7 @@ const NewsDetailPage = () => {
             </div>
           )}
 
-          
+          {/* Description */}
           {article.subtitle && (
             <div className="news-description">
               <p className="description-label">Опис</p>
@@ -189,7 +242,7 @@ const NewsDetailPage = () => {
             </div>
           )}
 
-       
+          {/* Link */}
           {article.link && (
             <div className="news-link">
               <a href={article.link} target="_blank" rel="noopener noreferrer">
@@ -198,11 +251,11 @@ const NewsDetailPage = () => {
             </div>
           )}
 
-         
+          {/* Comments Section */}
           <div className="comments-section">
             <h2 className="comments-title">Коментарі ({comments.length})</h2>
 
-        
+            {/* Comments List */}
             <div className="comments-list">
               {comments.length === 0 ? (
                 <p className="comments-empty">Коментарів поки немає. Будьте першим!</p>
@@ -227,7 +280,7 @@ const NewsDetailPage = () => {
               )}
             </div>
 
-           
+            {/* Add Comment */}
             <div className="comment-form">
               <textarea
                 value={newComment}
