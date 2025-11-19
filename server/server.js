@@ -1,13 +1,49 @@
 const express=require("express");
 const app=express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+const cors=require("cors");
+const corsOptions={
+    origin:["https://localhost:5173"],  //client 
+    methods: ["GET", "POST", "PUT", "DELETE"]
+}
+
+const { getAllUsers,updateUserData, saveUserToBD, userSignIn, deleteUserData, createUser } = require("./lib/FirebaseUsers");
+const { getAllNews, getNewsById, updateNewsData, createNews, deleteNewsData, getAllThemes}=require("./lib/FirebaseNews");
+const{ getAllComments, getCommentsByNewsId, updateComment, createComment, deleteComment}=require("./lib/FirebaseComments");
+
+const PORT = 8080;
+app.use(cors(corsOptions));
+
 ////
-const http = require("http");
+const https = require("https");
+const fs=require("fs");
 const WebSocket = require("ws");
 
-const server = http.createServer(app);
+const server = https.createServer({
+  key: fs.readFileSync("localhost-key.pem"),
+  cert: fs.readFileSync("localhost.pem")
+}, app);
+
 const wss = new WebSocket.Server({server});
+server.listen(PORT, () => console.log(`HTTPS + WebSocket сервер на ${PORT}`));
 
 const viewers = {};
+
+function broadcastNewComment(comment) {
+  const newsViewers = viewers[comment.news_id];
+  if (!newsViewers) return;
+
+  newsViewers.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        type: "new_comment",
+        data: comment
+      }));
+    }
+  });
+}
 
 wss.on("connection", (ws) => {
   console.log("WebSocket client connected");
@@ -52,36 +88,7 @@ wss.on("connection", (ws) => {
 
 });
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-const cors=require("cors");
-const corsOptions={
-    origin:["http://localhost:5173"],  //client 
-    methods: ["GET", "POST", "PUT", "DELETE"]
-}
-
-const { getAllUsers,updateUserData, saveUserToBD, userSignIn, deleteUserData, createUser } = require("./lib/FirebaseUsers");
-const { getAllNews, getNewsById, updateNewsData, createNews, deleteNewsData, getAllThemes}=require("./lib/FirebaseNews");
-const{ getAllComments, getCommentsByNewsId, updateComment, createComment, deleteComment}=require("./lib/FirebaseComments");
-
-
-function broadcastNewComment(comment) {
-  wss.clients.forEach(client => {
-    if ( client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({
-        type: "new_comment",
-        data: comment
-      }));
-    }
-  });
-}
-
-
-const PORT = 8080;
-app.use(cors(corsOptions));
-//app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
-server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
 //отримання даних
 app.get("/users", async (req, res) => {

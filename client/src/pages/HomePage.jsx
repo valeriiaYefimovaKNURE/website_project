@@ -4,36 +4,38 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { fetchNews, fetchThemes } from "../utils/firebase/news";
 import NewsCard from "../components/Tables/NewsCard";
-import { useNews } from "../utils/hooks/useNews";
 import ArrayButtons from "../components/Buttons/ArrayButtons";
 import { sortByDateAsc, sortByDateDesc } from "../utils/dataUtils";
 import icons from "../constants/icons";
+import { useFetchData } from "../utils/hooks/useFetchData";
 
 function HomePage() {
   const { user } = useUser();
   const navigate = useNavigate();
   const [selectedTheme, setSelectedTheme] = useState('Всі');
-  const [sortedPosts, setSortedPosts] = useState([]);
   const [sortDirection, setSortDirection] = useState("desc");
 
-  const { news, themes, isLoading: loading, error, refetch } = useNews(fetchNews,fetchThemes);
+  const { data, isLoading, error } = useFetchData({
+    news: fetchNews,
+    themes: fetchThemes
+  });
+
+  const { news = [], themes = [] } = data;
 
   const filteredPosts=useMemo(()=>{
     return selectedTheme==='Всі' ? news : news.filter((item)=>item.theme===selectedTheme);
   },[news,selectedTheme]);
 
-  useEffect(() => {
-    setSortedPosts(filteredPosts);
-  }, [filteredPosts]);
+  const sortedPosts = useMemo(() => {
+    if (sortDirection === "desc") {
+      return sortByDateDesc([...filteredPosts]);
+    } else {
+      return sortByDateAsc([...filteredPosts]);
+    }
+  }, [filteredPosts, sortDirection]);
 
   const handleSortClick = () => {
-    if (sortDirection === "desc") {
-      setSortedPosts(sortByDateAsc(sortedPosts));
-      setSortDirection("asc");
-    } else {
-      setSortedPosts(sortByDateDesc(sortedPosts));
-      setSortDirection("desc");
-    }
+    setSortDirection(prev => prev === "desc" ? "asc" : "desc");
   };
 
   return (
@@ -86,7 +88,7 @@ function HomePage() {
 
           {/* Секція з новинами */}
           <section className="news-section">
-          {loading && (
+          {isLoading && (
             <div className="news-loading">
               <p>Завантаження новин...</p>
             </div>
@@ -98,13 +100,13 @@ function HomePage() {
             </div>
           )}
 
-          {!loading && !error && news.length === 0 && (
+          {!isLoading && !error && news.length === 0 && (
             <div className="news-empty">
               <p>Новин поки що немає</p>
             </div>
           )}
 
-          {!loading && !error && news.length > 0 && (
+          {!isLoading && !error && news.length > 0 && (
             <>
               <ArrayButtons
                 itemArray={themes}

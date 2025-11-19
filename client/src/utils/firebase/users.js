@@ -1,10 +1,10 @@
 // users.js
 import axios from "axios";
-import { createAuth } from "../auth";
+import { createAuth } from "./auth";
 
 export const fetchUsers = async () => {
     try {
-      const userInfo = await axios.get("http://localhost:8080/users");
+      const userInfo = await axios.get("https://localhost:8080/users");
       return userInfo.data;
     } catch (error) {
       console.error("AdminPage / Помилка при завантаженні користувачів:", error);
@@ -16,7 +16,7 @@ export const createUser=async(userData)=>{
     try {
       const userId=await createAuth(userData.email,"123456");
 
-      const response = await fetch("http://localhost:8080/users", {
+      const response = await fetch("https://localhost:8080/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,7 +39,7 @@ export const handleSaveUserData=async(row, updatedFields)=>{
       const userId=row.id;
       if (!userId) throw new Error("Немає ID користувача(-ки) для оновлення");
 
-      const response=await fetch(`http://localhost:8080/users/${userId}`,{
+      const response=await fetch(`https://localhost:8080/users/${userId}`,{
         method:"PUT",
         headers:{
           "Content-type":"application/json"
@@ -58,7 +58,7 @@ export const handleSaveUserData=async(row, updatedFields)=>{
 
 export const handleDeleteUserData = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:8080/users/${userId}`, {
+      const response = await fetch(`https://localhost:8080/users/${userId}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Помилка при видаленні користувача");

@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const fetchComments = async () => {
     try {
-      const commentsInfo = await axios.get("http://localhost:8080/comments");
+      const commentsInfo = await axios.get("https://localhost:8080/comments");
 
       const formatted = commentsInfo.data.map(c => {
         const firstReport = c.reports?.[0] || {};
@@ -24,7 +24,7 @@ export const fetchComments = async () => {
 
 export const fetchCommentsByNewsId = async (id) => {
    try{
-     const { data } = await axios.get(`http://localhost:8080/comments/${id}`);
+     const { data } = await axios.get(`https://localhost:8080/comments/${id}`);
 
     return data.map(comment => {
       const [report = {}] = comment.reports || [];
@@ -46,7 +46,7 @@ export const fetchCommentsByNewsId = async (id) => {
 
 export const createComment=async(commentData)=>{
     try {
-      const response = await fetch("http://localhost:8080/comments", {
+      const response = await fetch("https://localhost:8080/comments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export const handleSaveCommentsData=async(row, updatedFields)=>{
 
       if (!newsId || !commentId) throw new Error("news_id або id коментаря відсутні!");
 
-      const response=await fetch(`http://localhost:8080/comments/${newsId}/${commentId}`,{
+      const response=await fetch(`https://localhost:8080/comments/${newsId}/${commentId}`,{
         method:"PUT",
         headers:{"Content-type":"application/json"},
         body:JSON.stringify(updatedFields)
@@ -96,7 +96,7 @@ export const handleDeleteCommentsData = async (id, commentsArray) => {
       const comment = commentsArray.find(c => c.id === id); 
       if (!comment) throw new Error("Не знайдено коментар для видалення");
 
-      const response = await fetch(`http://localhost:8080/comments/${comment.news_id}/${id}`,{
+      const response = await fetch(`https://localhost:8080/comments/${comment.news_id}/${id}`,{
         method: "DELETE"
       });
 

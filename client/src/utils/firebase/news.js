@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const fetchNews = async () => {
     try {
-      const newsInfo = await axios.get("http://localhost:8080/news");
+      const newsInfo = await axios.get("https://localhost:8080/news");
       return newsInfo.data;
     } catch (error) {
       console.error("AdminPage / Помилка при завантаженні новин:", error);
@@ -13,7 +13,7 @@ export const fetchNews = async () => {
 export const fetchNewsById = async(id) => {
   try{
     // if (!id ) throw new Error("news_id відсутнє!");
-     const response = await axios.get(`http://localhost:8080/news/${id}`);
+     const response = await axios.get(`https://localhost:8080/news/${id}`);
     return response.data;
   }catch(error){
     console.error("AdminPage / Помилка при завантаженні новини:", error);
@@ -23,7 +23,7 @@ export const fetchNewsById = async(id) => {
 
 export const fetchThemes = async () => {
   try {
-    const themesInfo = await axios.get("http://localhost:8080/news/themes");  
+    const themesInfo = await axios.get("https://localhost:8080/news/themes");  
     return themesInfo.data;
   } catch (error) {
     console.error("AdminPage / Помилка при завантаженні тем новин:", error);
@@ -33,7 +33,7 @@ export const fetchThemes = async () => {
 
 export const createNews=async(newsData)=>{
     try {
-      const response = await fetch("http://localhost:8080/news", {
+      const response = await fetch("https://localhost:8080/news", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +60,7 @@ export const handleSaveNewsData=async(row, updatedFields)=>{
       const newsId=row.id;
       if (!newsId) throw new Error("Немає ID новини для оновлення");
 
-      const response=await fetch(`http://localhost:8080/news/${newsId}`,{
+      const response=await fetch(`https://localhost:8080/news/${newsId}`,{
         method:"PUT",
         headers:{
           "Content-type":"application/json"
@@ -79,7 +79,7 @@ export const handleSaveNewsData=async(row, updatedFields)=>{
 
 export const handleDeleteNewsData = async (id) => {
     try {
-      const response = await fetch(`http://localhost:8080/news/${id}`, {
+      const response = await fetch(`https://localhost:8080/news/${id}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Помилка при видаленні новини");

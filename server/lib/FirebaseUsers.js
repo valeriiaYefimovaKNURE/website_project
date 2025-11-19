@@ -36,7 +36,12 @@ const userSignIn=async(userToken)=>{
             return false;
         }
 
-        return snapshot.val();
+        const userData = snapshot.val();
+
+        return {
+          id: uid,
+          ...userData
+        };
     }catch(error){
         console.error("FirebaseUsers.js / userSignIn() : Помилка при отриманні данних користувачів.")
         throw new Error("Не вдалось завантажити користувачів");

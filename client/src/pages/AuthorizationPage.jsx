@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createAuth, getAuthToken, resendEmailVerification } from "../utils/auth";
+import { createAuth, getAuthToken, resendEmailVerification } from "../utils/firebase/auth";
 import { useUser } from "../context/UserContext";
 import { validateForm, validateLoginForm } from "../utils/formValidation";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +31,7 @@ export default function AuthorizationPage() {
     setSubmitting(true);
     try{
       const userToken=await getAuthToken(form.email, form.password);
-      const res=await fetch("http://localhost:8080/login",{
+      const res=await fetch("https://localhost:8080/login",{
         method:"POST",
         headers:{"Content-type":"application/json"},
         body:JSON.stringify({userToken})
@@ -74,7 +74,7 @@ export default function AuthorizationPage() {
   }
   const confirmVerified=async()=>{
     try{
-      const res=await fetch("http://localhost:8080/complete-registration",{
+      const res=await fetch("https://localhost:8080/complete-registration",{
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

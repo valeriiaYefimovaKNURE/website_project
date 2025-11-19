@@ -150,17 +150,12 @@
   }
   
   .icon-heart {
-    width: 1.5rem;
+    width: 1.65rem;
     height: 1.5rem;
     color: #9ca3af;
     transition: all 0.2s;
   }
-  
-  .icon-heart.filled {
-    color: #ef4444;
-    fill: #ef4444;
-  }
-  
+
   .icon-comment {
     width: 1.5rem;
     height: 1.5rem;

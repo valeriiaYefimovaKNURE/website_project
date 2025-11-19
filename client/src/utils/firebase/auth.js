@@ -1,4 +1,4 @@
-import app from '../services/firebaseClient.config';
+import app from '../../services/firebaseClient.config';
 import { createUserWithEmailAndPassword, getAuth, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
 
 const auth=getAuth(app);
@@ -20,7 +20,7 @@ export const createAuth=async(email,password)=>{
         const userCred=await createUserWithEmailAndPassword(auth, email, password);
         
         await sendEmailVerification(userCred.user,{
-            url: 'http://localhost:5173/auth', // URL для редиректа после подтверждения
+            url: 'https://localhost:5173/auth', // URL для редиректа после подтверждения
             handleCodeInApp: false
         });
 
