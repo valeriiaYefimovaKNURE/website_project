@@ -21,6 +21,16 @@ export const fetchNewsById = async(id) => {
   }
 };
 
+export const fetchThemes = async () => {
+  try {
+    const themesInfo = await axios.get("http://localhost:8080/news/themes");  
+    return themesInfo.data;
+  } catch (error) {
+    console.error("AdminPage / Помилка при завантаженні тем новин:", error);
+    return [];
+  } 
+};
+
 export const createNews=async(newsData)=>{
     try {
       const response = await fetch("http://localhost:8080/news", {

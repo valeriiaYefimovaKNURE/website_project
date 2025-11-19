@@ -3,7 +3,7 @@ import { createAuth, getAuthToken, resendEmailVerification } from "../utils/auth
 import { useUser } from "../context/UserContext";
 import { validateForm, validateLoginForm } from "../utils/formValidation";
 import { useNavigate } from "react-router-dom";
-import BackButton from "../components/BackButton";
+import BackButton from "../components/Buttons/BackButton";
 
 export default function AuthorizationPage() {
   const {setUser}=useUser();
@@ -163,7 +163,7 @@ export default function AuthorizationPage() {
             >
               {isSubmitting ? "Завантаження..." : "Увійти"}
             </button>
-            <div className="text-center mt-2 text-gray-700 flex flex-row items-center justify-center mt-6">
+            <div className="text-center text-gray-700 flex flex-row items-center justify-center mt-6">
                Не маєте акаунт?{" "}
               <a
                 className="text-blue-600 hover:underline font-medium ml-2"

@@ -1,3 +1,52 @@
+# dependencies
+node_modules/
+
+#Firebase
+google-services.json
+GoogleService-Info.plist
+.firebase/
+
+pglite-debug.*
+*.firebaserc
+
+# Expo
+.expo/
+dist/
+web-build/
+# Add these to your .gitignore
+**/xcuserdata/
+**/*.xcodeproj/**/xcuserdata/
+**/*.xcworkspace/**/xcuserdata/
+**/DerivedData/
+**/build/
+**/.DS_Store
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+.env
+
+# typescript
+*.tsbuildinfo
+
 # Logs
 logs
 *.log

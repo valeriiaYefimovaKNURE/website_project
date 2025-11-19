@@ -62,7 +62,7 @@ const corsOptions={
 }
 
 const { getAllUsers,updateUserData, saveUserToBD, userSignIn, deleteUserData, createUser } = require("./lib/FirebaseUsers");
-const { getAllNews, getNewsById, updateNewsData, createNews, deleteNewsData}=require("./lib/FirebaseNews");
+const { getAllNews, getNewsById, updateNewsData, createNews, deleteNewsData, getAllThemes}=require("./lib/FirebaseNews");
 const{ getAllComments, getCommentsByNewsId, updateComment, createComment, deleteComment}=require("./lib/FirebaseComments");
 
 
@@ -96,6 +96,14 @@ app.get("/news", async (req, res) => {
   try {
     const news=await getAllNews();
     res.json(news);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+})
+app.get("/news/themes", async (req, res) => {
+  try {
+    const themes=await getAllThemes();
+    res.json(themes);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

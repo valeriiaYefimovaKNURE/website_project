@@ -35,6 +35,28 @@ const getNewsById = async(newsId)=>{
         throw new Error("Не вдалось завантажити новину");
     }
 }
+const getAllThemes=async()=>{
+    try{
+        const ref=database.ref("/News");
+        const snapshot=await ref.once("value");
+        
+        if(snapshot.exists()){
+            const data=snapshot.val();
+            const themesSet=new Set();
+            Object.keys(data).forEach((key)=>{
+                if(data[key].theme){
+                    themesSet.add(data[key].theme);
+                }   
+            });
+            return Array.from(themesSet);
+        }else{
+            return [];
+        }
+    }catch(error){
+        console.error("FirebaseNews.js / getAllThemes() : Помилка при отриманні тем новин.")
+        throw new Error("Не вдалось завантажити теми новин");
+    }
+}
 
 const createNews=async(newsData)=>{
     try{
@@ -86,4 +108,4 @@ const deleteNewsData = async (newsId) => {
 
 
 
-module.exports = { getAllNews, getNewsById, createNews, updateNewsData,deleteNewsData};
+module.exports = { getAllNews, getNewsById, getAllThemes,createNews, updateNewsData,deleteNewsData};

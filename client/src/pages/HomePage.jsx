@@ -1,33 +1,40 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "../styles/HomePage.css";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
-import { fetchNews } from "../utils/firebase/news";
+import { fetchNews, fetchThemes } from "../utils/firebase/news";
 import NewsCard from "../components/Tables/NewsCard";
+import { useNews } from "../utils/hooks/useNews";
+import ArrayButtons from "../components/Buttons/ArrayButtons";
+import { sortByDateAsc, sortByDateDesc } from "../utils/dataUtils";
+import icons from "../constants/icons";
 
 function HomePage() {
   const { user } = useUser();
   const navigate = useNavigate();
+  const [selectedTheme, setSelectedTheme] = useState('Всі');
+  const [sortedPosts, setSortedPosts] = useState([]);
+  const [sortDirection, setSortDirection] = useState("desc");
 
-  const [news, setNews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { news, themes, isLoading: loading, error, refetch } = useNews(fetchNews,fetchThemes);
+
+  const filteredPosts=useMemo(()=>{
+    return selectedTheme==='Всі' ? news : news.filter((item)=>item.theme===selectedTheme);
+  },[news,selectedTheme]);
 
   useEffect(() => {
-    const loadNews = async () => {
-      try {
-        const newsData = await fetchNews();
-        setNews(newsData);
-      } catch (err) {
-        console.error("Помилка завантаження новин:", err);
-        setError("Не вдалося завантажити новини");
-      } finally {
-        setLoading(false);
-      }
-    };
+    setSortedPosts(filteredPosts);
+  }, [filteredPosts]);
 
-    loadNews();
-  }, []);
+  const handleSortClick = () => {
+    if (sortDirection === "desc") {
+      setSortedPosts(sortByDateAsc(sortedPosts));
+      setSortDirection("asc");
+    } else {
+      setSortedPosts(sortByDateDesc(sortedPosts));
+      setSortDirection("desc");
+    }
+  };
 
   return (
     <>
@@ -98,11 +105,29 @@ function HomePage() {
           )}
 
           {!loading && !error && news.length > 0 && (
-            <div className="news-grid">
-              {news.map((item) => (
-                <NewsCard key={item.id} news={item} />
-              ))}
-            </div>
+            <>
+              <ArrayButtons
+                itemArray={themes}
+                selectedItem={selectedTheme}
+                onItemSelect={(item)=>setSelectedTheme(item)}
+                defaultItemText='Всі'
+              />
+              <div className="flex-row items-end">
+                <p>Сортувати за датою</p>
+                <img
+                  src={icons.arrows_vertical}
+                  alt="Vertical Arrows"
+                  className="w-10 h-10 cursor-pointer"
+                  onClick={handleSortClick}
+                />
+              </div>
+              
+              <div className="news-grid">
+                {sortedPosts.map((item) => (
+                  <NewsCard key={item.id} news={item} />
+                ))}
+              </div>
+            </>
           )}
         </section>
       </main>
