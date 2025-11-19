@@ -8,7 +8,7 @@ const ArrayButtons = ({itemArray, selectedItem, onItemSelect, defaultItemText=''
       {items.map((item, index) => (
         <button 
           key={index.toString()}
-          className={item === selectedItem ? 'array-button.selected' : 'array-button'}
+          className={`array-button ${item === selectedItem ? 'selected' : ''}`}
           onClick={() => onItemSelect(item)}
         >
           {item}
