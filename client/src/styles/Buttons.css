@@ -2,13 +2,25 @@
     border-radius:50px;
     padding: 0.75rem 1.5rem; 
     border: 2px solid #AD89BD;
-    background-color: transparent;
+    
     text-align: center;
     font-weight: medium;
     margin-left: 1rem;
+    margin-right: 1rem;
+    margin-top: 1rem;
+    transition: all 0.2s ease;
 }
+
+.array-button:hover {
+    background-color: #f1ebf4;
+    transform: translateY(-2px);
+    border: 2px solid #17121a;
+  }
+
+
 .array-button.selected{
-    background-color: rgb(228, 142, 180);
+    background-color: rgb(172, 101, 177);
     color: white;
     font-weight: bold;
+    
 }

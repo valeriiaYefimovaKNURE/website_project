@@ -61,3 +61,31 @@
   color: #475569; 
   line-height: 1.6;
 }
+
+
+.sort-container {
+  display: flex;
+  justify-content: flex-end;   
+  align-items: center;        
+  gap: 1rem;               
+  margin-right: 5rem;    
+  margin-top: 4rem;          
+     
+}
+
+
+
+.sort-text {
+  font-weight: 600;  
+  font-size: 1.05rem;
+  color: #333;
+}
+
+.sort-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+

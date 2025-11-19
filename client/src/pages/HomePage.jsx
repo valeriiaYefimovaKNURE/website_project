@@ -112,8 +112,8 @@ function HomePage() {
                 onItemSelect={(item)=>setSelectedTheme(item)}
                 defaultItemText='Всі'
               />
-              <div className="flex-row items-end">
-                <p>Сортувати за датою</p>
+              <div className="sort-container">
+                <p  className="sort-text">Сортувати за датою</p>
                 <img
                   src={icons.arrows_vertical}
                   alt="Vertical Arrows"
