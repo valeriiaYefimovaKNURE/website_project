@@ -1,5 +1,56 @@
 const express=require("express");
 const app=express();
+////
+const http = require("http");
+const WebSocket = require("ws");
+
+const server = http.createServer(app);
+const wss = new WebSocket.Server({server});
+
+const viewers = {};
+
+wss.on("connection", (ws) => {
+  console.log("WebSocket client connected");
+
+  ws.on("message", (msg) => {
+    const message = JSON.parse(msg);
+
+    // якщо користувач відкрив новину
+    if (message.type === "join") {
+      const { news_id } = message.data;
+      if (!viewers[news_id]) viewers[news_id] = new Set();
+      viewers[news_id].add(ws);
+
+      // Відправити всім клієнтам, що дивляться цю новину оновлену кількість
+      const count = viewers[news_id].size;
+      viewers[news_id].forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ type: "viewers_count", data: { news_id, count } }));
+        }
+      });
+    }
+
+    // логіка для нових коментарів
+    if (message.type === "new_comment") {
+      broadcastNewComment(message.data);
+    }
+  });
+
+   ws.on("close", () => {
+    console.log("WebSocket client disconnected");
+    // видаляємо ws з усіх news_id
+    for (const news_id in viewers) {
+      viewers[news_id].delete(ws);
+      const count = viewers[news_id].size;
+      viewers[news_id].forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ type: "viewers_count", data: { news_id, count } }));
+        }
+      });
+    }
+  });
+
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -9,13 +60,28 @@ const corsOptions={
     origin:["http://localhost:5173"],  //client 
     methods: ["GET", "POST", "PUT", "DELETE"]
 }
+
 const { getAllUsers,updateUserData, saveUserToBD, userSignIn, deleteUserData, createUser } = require("./lib/FirebaseUsers");
 const { getAllNews, getNewsById, updateNewsData, createNews, deleteNewsData}=require("./lib/FirebaseNews");
 const{ getAllComments, getCommentsByNewsId, updateComment, createComment, deleteComment}=require("./lib/FirebaseComments");
 
+
+function broadcastNewComment(comment) {
+  wss.clients.forEach(client => {
+    if ( client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        type: "new_comment",
+        data: comment
+      }));
+    }
+  });
+}
+
+
 const PORT = 8080;
 app.use(cors(corsOptions));
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+//app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
 //отримання даних
 app.get("/users", async (req, res) => {
@@ -109,6 +175,12 @@ app.post("/comments", async(req,res)=>{
     }
 
     const created=await createComment(newsId,newComment);
+    
+    broadcastNewComment({
+      id: created,
+      ...newComment
+    });
+
     res.status(201).json(created);
   }catch(error){
     console.error("Сервер: Помилка збереження коментаря", error.message);
