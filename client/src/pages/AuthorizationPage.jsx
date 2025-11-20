@@ -74,7 +74,7 @@ export default function AuthorizationPage() {
   }
   const confirmVerified=async()=>{
     try{
-      const res=await fetch("https://localhost:8080/complete-registration",{
+      const res=await fetch("https://localhost:8080/register",{
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
