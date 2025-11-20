@@ -60,14 +60,10 @@ const useWebSocket = (newsId) => {
 
   // Heartbeat
   useEffect(() => {
-    if (readyState !== WebSocket.OPEN) return;
-
-    const interval = setInterval(() => {
-      sendMessage(JSON.stringify({ type: "ping" }));
-    }, 25000);
-
-    return () => clearInterval(interval);
-  }, [readyState, sendMessage]);
+    if (readyState === WebSocket.OPEN && newsId) {
+      sendMessage(JSON.stringify({ type: "join", data: { news_id: newsId } }));
+    }
+  }, [readyState, newsId, sendMessage]);
 
   // Скидаємо стан при зміні newsId
   useEffect(() => {
