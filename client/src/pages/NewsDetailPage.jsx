@@ -21,6 +21,7 @@ const NewsDetailPage = () => {
   });
   const { article = null, comments: initialComments = [] } = data;
   const [comments, setComments] = useState(initialComments);
+  const [articleState, setArticleState] = useState(null);
 
   const { viewersCount, newComment: wsNewComment, isConnected } = useWebSocket(id);
 
@@ -47,10 +48,16 @@ const NewsDetailPage = () => {
     }
   }, [wsNewComment]);
 
+  useEffect(() => {
+    if (article) {
+      setArticleState(article);
+    }
+  }, [article]);
+
 
   const handleLike = () => {
     setIsLiked(!isLiked);
-    setArticle(prev => ({
+    setArticleState(prev => ({
       ...prev,
       likes: isLiked ? prev.likes - 1 : prev.likes + 1
     }));
@@ -159,7 +166,7 @@ const NewsDetailPage = () => {
               <img className={`icon-heart ${isLiked ? 'filled' : ''}`} fill={isLiked ? "currentColor" : "none"}
                 src={isLiked? icons.icon_like_pressed : icons.icon_like}
               />
-              <span>{article.likes || 0}</span>
+              <span>{articleState?.likes || 0}</span>
             </button>
             <div className="stat-item">
               <img className="icon-comment"
