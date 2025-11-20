@@ -57,7 +57,6 @@ wss.on("connection", (ws) => {
       if (!viewers[news_id]) viewers[news_id] = new Set();
       viewers[news_id].add(ws);
 
-      // Відправити всім клієнтам, що дивляться цю новину оновлену кількість
       const count = viewers[news_id].size;
       viewers[news_id].forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
@@ -192,7 +191,7 @@ app.post("/comments", async(req,res)=>{
     const created=await createComment(newsId,newComment);
     
     broadcastNewComment({
-      id: created,
+      id: created.id,
       ...newComment
     });
 
