@@ -7,6 +7,7 @@ import '../styles/NewsDetailPage.css';
 import icons from "../constants/icons";
 import useWebSocket from '../utils/hooks/useWebSocket';
 import { useFetchData } from '../utils/hooks/useFetchData';
+import { useMemo } from 'react';
 
 const NewsDetailPage = () => {
   const { id } = useParams();
@@ -15,22 +16,25 @@ const NewsDetailPage = () => {
 
   const [newComment, setNewComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
-  const { data, isLoading, error, refetch } = useFetchData({
+
+  const fetchConfig = useMemo(() => ({
     article: () => fetchNewsById(id),
     comments: () => fetchCommentsByNewsId(id)
-  });
+  }), [id]);
+
+  const { data, isLoading, error, refetch } = useFetchData(fetchConfig);
   const { article = null, comments: initialComments = [] } = data;
+
   const [comments, setComments] = useState(initialComments);
 
   const { viewersCount, newComment: wsNewComment, isConnected } = useWebSocket(id);
 
-
   // Оновлюємо коментарі, коли вони завантажилися
   useEffect(() => {
-    if (initialComments.length > 0) {
+    if (initialComments.length >= 0) {
       setComments(initialComments);
     }
-  }, [initialComments]);
+  }, [initialComments.length]);
 
   //Новий коментар з WebSocket
   useEffect(() => {

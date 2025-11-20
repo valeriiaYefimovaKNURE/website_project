@@ -30,6 +30,7 @@ const wss = new WebSocket.Server({server});
 server.listen(PORT, () => console.log(`HTTPS + WebSocket сервер на ${PORT}`));
 
 const viewers = {};
+const clientNewsMap = new WeakMap();
 
 function broadcastNewComment(comment) {
   const newsViewers = viewers[comment.news_id];
@@ -49,42 +50,77 @@ wss.on("connection", (ws) => {
   console.log("WebSocket client connected");
 
   ws.on("message", (msg) => {
-    const message = JSON.parse(msg);
+    try{
+      const message = JSON.parse(msg);
 
-    // якщо користувач відкрив новину
-    if (message.type === "join") {
-      const { news_id } = message.data;
-      if (!viewers[news_id]) viewers[news_id] = new Set();
-      viewers[news_id].add(ws);
+      // якщо користувач відкрив новину
+      if (message.type === "join") {
+        const { news_id } = message.data;
 
-      const count = viewers[news_id].size;
-      viewers[news_id].forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({ type: "viewers_count", data: { news_id, count } }));
+        //Перевіряємо, чи клієнт вже підключений до цієї новини
+        const currentNewsId = clientNewsMap.get(ws);
+        if(currentNewsId===news_id){
+          return; 
         }
-      });
-    }
 
-    // логіка для нових коментарів
-    if (message.type === "new_comment") {
-      broadcastNewComment(message.data);
+        //Якщо клієнт був підключений до іншої новини, видаляємо його звідти
+        if(currentNewsId && viewers[currentNewsId]){
+          viewers[currentNewsId].delete(ws);
+
+          const oldCount = viewers[currentNewsId].size;
+          viewers[currentNewsId].forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({ type: "viewers_count", data: { news_id:currentNewsId, count:oldCount } }));
+            }
+          });
+        }
+
+        // Додаємо до нової новини
+        if(!viewers[news_id]) viewers[news_id]=new Set();
+
+        viewers[news_id].add(ws);
+        clientNewsMap.set(ws, news_id);
+
+        const count=viewers[news_id].size;
+
+        viewers[news_id].forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: "viewers_count", data: { news_id, count } }));
+          }
+        });
+      }
+
+      // логіка для нових коментарів
+      if (message.type === "new_comment") {
+        broadcastNewComment(message.data);
+      }
+    }catch(error){
+      console.error("WebSocket message error:", error.message);
     }
   });
 
-   ws.on("close", () => {
+   wss.on("close", () => {
     console.log("WebSocket client disconnected");
-    // видаляємо ws з усіх news_id
-    for (const news_id in viewers) {
+    // видаляємо ws тільки з тієї новини, до якої він був підключений
+
+    const news_id=clientNewsMap.get(wss);
+    if (news_id && viewers[news_id]) {
       viewers[news_id].delete(ws);
       const count = viewers[news_id].size;
+
       viewers[news_id].forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({ type: "viewers_count", data: { news_id, count } }));
         }
       });
+
+      if(viewers[news_id].size===0){
+        delete viewers[news_id];
+      }
+
+      clientNewsMap.delete(ws);
     }
   });
-
 });
 
 

@@ -1,84 +1,82 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import useWebSocketLib from 'react-use-websocket';
+
+const WS_URL = "wss://localhost:8080";
 
 const useWebSocket = (newsId) => {
   const [viewersCount, setViewersCount] = useState(0);
   const [newComment, setNewComment] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const wsRef = useRef(null);
-  const reconnectTimeoutRef = useRef(null);
+  const didJoinRef = useRef(false);
 
+  const { sendMessage, lastMessage, readyState } = useWebSocketLib(WS_URL, {
+    shouldReconnect: () => true, // Автоматичне перепідключення
+    reconnectAttempts: 10,
+    reconnectInterval: 3000,
+    onOpen: () => {
+      console.log('WebSocket підключено');
+      didJoinRef.current = false; // Скидаємо при перепідключенні
+    },
+    onClose: () => {
+      console.log('WebSocket закрито');
+      didJoinRef.current = false;
+    },
+    onError: (event) => {
+      console.error('WebSocket помилка:', event);
+    },
+  });
+
+  // Відправляємо JOIN коли підключено і є newsId
   useEffect(() => {
-    if (!newsId) return;
+    if (readyState === WebSocket.OPEN && newsId && !didJoinRef.current) {
+      sendMessage(JSON.stringify({
+        type: "join",
+        data: { news_id: newsId }
+      }));
+      didJoinRef.current = true;
+    }
+  }, [readyState, newsId, sendMessage]);
 
-    const connectWebSocket = () => {
+  // Обробка отриманих повідомлень
+  useEffect(() => {
+    if (lastMessage !== null) {
       try {
-        const ws = new WebSocket("wss://localhost:8080");
-        wsRef.current = ws;
+        const msg = JSON.parse(lastMessage.data);
 
-        ws.onerror = (event) => {
-          console.error("WebSocket помилка:", event);
-          setIsConnected(false);
-        };
+        // Кількість глядачів
+        if (msg.type === "viewers_count" && msg.data.news_id === newsId) {
+          setViewersCount(msg.data.count);
+        }
 
-        ws.onclose = (event) => {
-          console.log("WebSocket закрито", event.code, event.reason);
-          setIsConnected(false);
+        // Новий коментар
+        if (msg.type === "new_comment" && msg.data.news_id === newsId) {
+          setNewComment(msg.data);
+        }
 
-          // Автоматичне перепідключення
-          if (event.code !== 1000) {
-            reconnectTimeoutRef.current = setTimeout(() => {
-              console.log("Спроба перепідключення WebSocket...");
-              connectWebSocket();
-            }, 3000);
-          }
-        };
-
-        ws.onopen = () => {
-          console.log("WebSocket підключено успішно");
-          setIsConnected(true);
-          ws.send(JSON.stringify({ 
-            type: "join", 
-            data: { news_id: newsId } 
-          }));
-        };
-
-        ws.onmessage = (event) => {
-          try {
-            const message = JSON.parse(event.data);
-
-            // Оновлюємо кількість глядачів
-            if (message.type === "viewers_count" && message.data.news_id === newsId) {
-              setViewersCount(message.data.count);
-            }
-
-            // Отримали новий коментар
-            if (message.type === "new_comment") {
-              const comment = message.data;
-              if (comment.news_id === newsId) {
-                setNewComment(comment);
-              }
-            }
-          } catch (err) {
-            console.error("Помилка обробки повідомлення WS:", err);
-          }
-        };
       } catch (err) {
-        console.error("Не вдалося створити WebSocket:", err);
+        console.error('Помилка парсингу:', err);
       }
-    };
+    }
+  }, [lastMessage, newsId]);
 
-    connectWebSocket();
+  // Heartbeat
+  useEffect(() => {
+    if (readyState !== WebSocket.OPEN) return;
 
-    // Cleanup
-    return () => {
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.close(1000, "Component unmounted");
-      }
-    };
+    const interval = setInterval(() => {
+      sendMessage(JSON.stringify({ type: "ping" }));
+    }, 25000);
+
+    return () => clearInterval(interval);
+  }, [readyState, sendMessage]);
+
+  // Скидаємо стан при зміні newsId
+  useEffect(() => {
+    setViewersCount(0);
+    setNewComment(null);
+    didJoinRef.current = false;
   }, [newsId]);
+
+  const isConnected = readyState === WebSocket.OPEN;
 
   return { viewersCount, newComment, isConnected };
 };

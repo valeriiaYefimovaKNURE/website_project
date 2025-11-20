@@ -15,10 +15,11 @@ function HomePage() {
   const [selectedTheme, setSelectedTheme] = useState('Всі');
   const [sortDirection, setSortDirection] = useState("desc");
 
-  const { data, isLoading, error } = useFetchData({
+  const fetchConfig = useMemo(() => ({
     news: fetchNews,
     themes: fetchThemes
-  });
+  }), []);
+  const { data, isLoading, error } = useFetchData(fetchConfig);
 
   const { news = [], themes = [] } = data;
 

@@ -23,7 +23,7 @@ export const useFetchData = (fetchConfig) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchConfig]);
 
   useEffect(() => {
     fetchData();
