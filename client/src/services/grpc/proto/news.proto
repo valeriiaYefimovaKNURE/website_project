@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+message Comment {
+  string id = 1;
+  string author_uid = 2;
+  string text = 3;
+  int64 data = 4;
+}
+
+message News{
+    string id=1;
+    string creator_uid=2;
+    string title=3;
+    string subtitle=4;
+    string text=5;
+    int32 likes=6;
+    int32 comments=7;
+
+    // comments_array як масив об'єктів Comment
+    repeated Comment comments_array = 8;
+}
+
+message AddNewsResponse{
+    bool success=1;
+}
+
+service News{
+    rpc AddNews(News) returns (AddNewsResponse);
+}

@@ -4,6 +4,7 @@ const https = require("https");
 const fs=require("fs");
 
 const { initNewsSocket } = require("./sockets/newsSocket");
+const { startGrpcServer } = require("./config/grpc/grpcNewsServer");
 
 const usersRouter = require("./routes/users");
 const newsRouter = require("./routes/news");
@@ -29,11 +30,13 @@ app.use("/register", registerRouter);
 
 const PORT = 8080;
 const server = https.createServer({
-  key: fs.readFileSync("localhost-key.pem"),
-  cert: fs.readFileSync("localhost.pem")
+  key: fs.readFileSync("./config/ssl/localhost-key.pem"),
+  cert: fs.readFileSync("./config/ssl/localhost.pem")
 }, app);
 
 const ws = initNewsSocket(server);
 app.locals.broadcastNewComment = ws.broadcastNewComment;
+
+startGrpcServer();
 
 server.listen(PORT, () => console.log(`HTTPS + WebSocket сервер на ${PORT}`));

@@ -1,4 +1,4 @@
-const { database } = require("../firebaseAdmin.config");
+const { database } = require("../config/firebaseAdmin.config");
 const {getAllNews}=require("./FirebaseNews");
 
 const getAllComments=async()=>{

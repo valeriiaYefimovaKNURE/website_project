@@ -1,5 +1,5 @@
 const { auth } = require("firebase-admin");
-const { database } = require("../firebaseAdmin.config");
+const { database } = require("../config/firebaseAdmin.config");
 
 const getAllUsers=async()=>{
     try {
