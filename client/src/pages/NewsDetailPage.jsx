@@ -8,6 +8,8 @@ import icons from "../constants/icons";
 import useWebSocket from '../utils/hooks/useWebSocket';
 import { useFetchData } from '../utils/hooks/useFetchData';
 import { useMemo } from 'react';
+import { fetchIsNewsLiked, fetchCreateLike, fetchDeleteLike } from "../utils/firebase/likes";
+
 
 const NewsDetailPage = () => {
   const { id } = useParams();
@@ -59,13 +61,41 @@ const NewsDetailPage = () => {
   }, [article]);
 
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setArticleState(prev => ({
-      ...prev,
-      likes: isLiked ? prev.likes - 1 : prev.likes + 1
-    }));
+  const handleLike = async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      if (!isLiked) {
+        await fetchCreateLike(user.id, id);
+        setIsLiked(true);
+        setArticleState(prev => ({
+          ...prev,
+          likes: (prev.likes || 0) + 1
+        }));
+    } else {
+      await fetchDeleteLike(user.id, id);
+      setIsLiked(false);
+      setArticleState(prev => ({
+        ...prev,
+        likes: Math.max((prev.likes || 1) - 1, 0)
+      }));
+    }
+  } catch (error) {
+    console.error("Помилка лайку:", error);
+    alert("Не вдалося змінити лайк");
+  }
   };
+
+  useEffect(() => {
+    if (!user) return;
+    const loadLikeState = async () => {
+      const liked = await fetchIsNewsLiked(user.id, id);
+      setIsLiked(liked);
+    };
+    loadLikeState();
+  }, [user, id]);
+
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
@@ -164,7 +194,7 @@ const NewsDetailPage = () => {
           {/* Stats */}
           <div className="news-stats">
             <button 
-              onClick={handleLike}
+              onClick={user? handleLike:undefined}
               className={`stat-item stat-likes ${isLiked ? 'liked' : ''}`}
             >
               <img className={`icon-heart ${isLiked ? 'filled' : ''}`} fill={isLiked ? "currentColor" : "none"}
