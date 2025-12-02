@@ -14,7 +14,6 @@ const getIsNewsLiked=async(userId,newsId)=>{
         const user = allUsers.find(u => u.id === userId);
         if (!user || !user.likesArray) return false;
 
-        // Логіка: якщо в likesArray є ключ newsId → лайк існує
         return user.likesArray[newsId] === true;
     }catch{
         console.error("FirebaseLikes.js / getIsNewsLiked():", error.message);
