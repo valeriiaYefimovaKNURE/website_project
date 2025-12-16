@@ -4,28 +4,35 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { fetchNews, fetchThemes } from "../utils/firebase/news";
 import NewsCard from "../components/Tables/NewsCard";
+import AddArticleButton from "../components/Buttons/AddArticleButton";
 import ArrayButtons from "../components/Buttons/ArrayButtons";
 import { sortByDateAsc, sortByDateDesc } from "../utils/dataUtils";
 import icons from "../constants/icons";
 import { useFetchData } from "../utils/hooks/useFetchData";
+import Footer from "../components/Footer";
 
 function HomePage() {
   const { user } = useUser();
   const navigate = useNavigate();
-  const [selectedTheme, setSelectedTheme] = useState('Всі');
+  const [selectedTheme, setSelectedTheme] = useState("Всі");
   const [sortDirection, setSortDirection] = useState("desc");
 
-  const fetchConfig = useMemo(() => ({
-    news: fetchNews,
-    themes: fetchThemes
-  }), []);
+  const fetchConfig = useMemo(
+    () => ({
+      news: fetchNews,
+      themes: fetchThemes,
+    }),
+    []
+  );
   const { data, isLoading, error } = useFetchData(fetchConfig);
 
   const { news = [], themes = [] } = data;
 
-  const filteredPosts=useMemo(()=>{
-    return selectedTheme==='Всі' ? news : news.filter((item)=>item.theme===selectedTheme);
-  },[news,selectedTheme]);
+  const filteredPosts = useMemo(() => {
+    return selectedTheme === "Всі"
+      ? news
+      : news.filter((item) => item.theme === selectedTheme);
+  }, [news, selectedTheme]);
 
   const sortedPosts = useMemo(() => {
     if (sortDirection === "desc") {
@@ -36,7 +43,7 @@ function HomePage() {
   }, [filteredPosts, sortDirection]);
 
   const handleSortClick = () => {
-    setSortDirection(prev => prev === "desc" ? "asc" : "desc");
+    setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"));
   };
 
   return (
@@ -52,7 +59,11 @@ function HomePage() {
         <img src="mepower_logo.png" className="mepower-logo" />
 
         <div className="flex flex-row space-x-6 items-center">
-          <p className="">{user?.name}</p>
+          <p>{user?.name}</p>
+
+          {user && (
+    <AddArticleButton />
+  )}
           {user ? (
             <button onClick={() => navigate("/admin")}>Адмінська панель</button>
           ) : (
@@ -77,18 +88,16 @@ function HomePage() {
 
         {/* Текст перед новинами */}
         <section className="news-intro">
-          <h2 className="news-intro_title ">
-            Останні новини та статті
-          </h2>
+          <h2 className="news-intro_title ">Останні новини та статті</h2>
           <p className="news-intro_subtitle">
-          Дізнавайтесь про найсвіжіші події та цікаві матеріали на нашій платформі! Не забудьте підписатися, і ми повідомимо вас про всі новини першими.
+            Дізнавайтесь про найсвіжіші події та цікаві матеріали на нашій
+            платформі! Не забудьте підписатися, і ми повідомимо вас про всі
+            новини першими.
           </p>
         </section>
 
-
-
-          {/* Секція з новинами */}
-          <section className="news-section">
+        {/* Секція з новинами */}
+        <section className="news-section">
           {isLoading && (
             <div className="news-loading">
               <p>Завантаження новин...</p>
@@ -112,11 +121,11 @@ function HomePage() {
               <ArrayButtons
                 itemArray={themes}
                 selectedItem={selectedTheme}
-                onItemSelect={(item)=>setSelectedTheme(item)}
-                defaultItemText='Всі'
+                onItemSelect={(item) => setSelectedTheme(item)}
+                defaultItemText="Всі"
               />
               <div className="sort-container">
-                <p  className="sort-text">Сортувати за датою</p>
+                <p className="sort-text">Сортувати за датою</p>
                 <img
                   src={icons.arrows_vertical}
                   alt="Vertical Arrows"
@@ -124,7 +133,7 @@ function HomePage() {
                   onClick={handleSortClick}
                 />
               </div>
-              
+
               <div className="news-grid">
                 {sortedPosts.map((item) => (
                   <NewsCard key={item.id} news={item} />
@@ -134,6 +143,9 @@ function HomePage() {
           )}
         </section>
       </main>
+
+  
+       <Footer />
     </>
   );
 }

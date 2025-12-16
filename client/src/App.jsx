@@ -10,6 +10,7 @@ import AuthorizationPage from './pages/AuthorizationPage.jsx';
 import { UserProvider } from './context/UserContext.jsx';
 import HomePage from './pages/HomePage.jsx';
 import NewsDetailPage from './pages/NewsDetailPage.jsx';
+import CreateNewsPage from './pages/CreateNewsPage.jsx';
 
 
 const router = createBrowserRouter([
@@ -32,6 +33,11 @@ const router = createBrowserRouter([
     element: <NewsDetailPage />,
   },
 
+
+  {
+    path: "create",
+    element: <CreateNewsPage />,
+  },
 
 ]);
 
