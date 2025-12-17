@@ -1,4 +1,5 @@
 const { database } = require("../config/firebaseAdmin.config");
+const client = require("../config/grpc/grpcNewsClient");
 
 const getAllNews=async()=>{
     try {
@@ -71,6 +72,20 @@ const createNews=async(newsData)=>{
         };
 
         await ref.set(newNews);
+
+        client.NotifyNewPost(
+            {
+                title: newNews.title,
+                shortText: newNews.subtitle,
+                postUrl: `https://localhost:5173/news/${newNews.id}`,
+                imageUri: newNews.imageUri,
+            },
+            (err, response) => {
+                if (err) {
+                    console.error("gRPC error:", err);
+                }
+            }
+        );
 
         console.log("Допис викладено!")
         return newNews;

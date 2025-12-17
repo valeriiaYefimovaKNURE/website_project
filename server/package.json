@@ -19,6 +19,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "firebase-admin": "^13.2.0",
+    "node-telegram-bot-api": "^0.67.0",
+    "openssl": "^2.0.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {

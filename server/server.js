@@ -11,6 +11,7 @@ const commentsRouter = require("./routes/comments");
 const likesRouter = require("./routes/likes")
 const loginRouter = require("./routes/login");
 const registerRouter = require("./routes/register");
+const { startGrpcServer } = require("./config/grpc/grpcNewsServer");
 
 const app=express();
 app.use(express.json());
@@ -31,11 +32,13 @@ app.use("/register", registerRouter);
 
 const PORT = 8080;
 const server = https.createServer({
-  key: fs.readFileSync("localhost-key.pem"),
-  cert: fs.readFileSync("localhost.pem")
+  key: fs.readFileSync("./config/ssl/localhost-key.pem"),
+  cert: fs.readFileSync("./config/ssl/localhost.pem")
 }, app);
 
 const ws = initNewsSocket(server);
 app.locals.broadcastNewComment = ws.broadcastNewComment;
+
+startGrpcServer();
 
 server.listen(PORT, () => console.log(`HTTPS + WebSocket сервер на ${PORT}`));

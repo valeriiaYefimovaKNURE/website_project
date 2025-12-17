@@ -2,14 +2,17 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import icons from '../constants/icons';
 import '../styles/CreateNewsPage.css';
+import { createNews } from '../utils/firebase/news';
+import { formatDate } from '../utils/dataUtils';
+import { useUser } from '../context/UserContext';
 
 const CreateNewsPage = () => {
     const navigate = useNavigate();
+    const { user } = useUser();
     const [formData, setFormData] = useState({
         title: '',
         subtitle: '',
         imageUri: '',
-        creatorName: '',
         link: '',
         theme: 'Новини',
         isActual: true
@@ -92,10 +95,6 @@ const CreateNewsPage = () => {
             newErrors.subtitle = 'Опис обов\'язковий';
         }
         
-        if (!formData.creatorName.trim()) {
-            newErrors.creatorName = 'Ім\'я автора обов\'язкове';
-        }
-        
         if (uploadMethod === 'url' && formData.imageUri && !isValidUrl(formData.imageUri)) {
             newErrors.imageUri = 'Невірний формат URL';
         }
@@ -141,10 +140,15 @@ const CreateNewsPage = () => {
             const newsData = {
                 ...formData,
                 imageUri: imageUrl,
-                date: new Date().toISOString(),
-                likes: 0
+                date: formatDate(new Date()),
+                likes: 0,
+                creatorUid:user.id,
+                creatorLogin:user.login,
+                creatorName:user.name
             };
             
+            // Відправка даних на сервер
+            await createNews(newsData);
             
             console.log('Створено новину:', newsData);
             
@@ -163,217 +167,199 @@ const CreateNewsPage = () => {
             <div className="create-news-container">
                 <div className="create-news-header">
                 <button onClick={() => navigate('/')} className="btn-back">
-            <img 
-              src={icons.back_arrow_black}
-            />
-          </button>
+                <img 
+                    src={icons.back_arrow_black}
+                />
+                </button>
 
-                    <h1>Створення нової статті</h1>
-                    
-                   
+                <h1>Створення нової статті</h1>
+                      
+            </div>
+
+            <form onSubmit={handleSubmit} className="create-news-form">
+                {/* Основна інформація */}
+                <div className="form-group full-width">
+                    <label htmlFor="title">
+                        Назва статті <span className="required">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="Введіть назву статті"
+                        className={errors.title ? 'error' : ''}
+                    />
+                    {errors.title && <span className="error-message">{errors.title}</span>}
                 </div>
 
-                <form onSubmit={handleSubmit} className="create-news-form">
-                    {/* Основна інформація */}
-                    <div className="form-group full-width">
-                        <label htmlFor="title">
-                            Назва статті <span className="required">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="title"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleChange}
-                            placeholder="Введіть назву статті"
-                            className={errors.title ? 'error' : ''}
-                        />
-                        {errors.title && <span className="error-message">{errors.title}</span>}
-                    </div>
+                <div className="form-group full-width">
+                    <label htmlFor="subtitle">
+                        Опис <span className="required">*</span>
+                    </label>
+                    <textarea
+                        id="subtitle"
+                        name="subtitle"
+                        value={formData.subtitle}
+                        onChange={handleChange}
+                        placeholder="Введіть опис статті"
+                        rows="5"
+                        className={errors.subtitle ? 'error' : ''}
+                    />
+                    {errors.subtitle && <span className="error-message">{errors.subtitle}</span>}
+                </div>
 
-                    <div className="form-group full-width">
-                        <label htmlFor="subtitle">
-                            Опис <span className="required">*</span>
-                        </label>
-                        <textarea
-                            id="subtitle"
-                            name="subtitle"
-                            value={formData.subtitle}
-                            onChange={handleChange}
-                            placeholder="Введіть опис статті"
-                            rows="5"
-                            className={errors.subtitle ? 'error' : ''}
-                        />
-                        {errors.subtitle && <span className="error-message">{errors.subtitle}</span>}
-                    </div>
-
-                   
-                    <div className="form-group">
-                        <label htmlFor="creatorName">
-                            Автор <span className="required">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="creatorName"
-                            name="creatorName"
-                            value={formData.creatorName}
-                            onChange={handleChange}
-                            placeholder="Ім'я автора"
-                            className={errors.creatorName ? 'error' : ''}
-                        />
-                        {errors.creatorName && <span className="error-message">{errors.creatorName}</span>}
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="theme">
-                            Тематика
-                        </label>
-                        <select
-                            id="theme"
-                            name="theme"
-                            value={formData.theme}
-                            onChange={handleChange}
-                        >
-                            {themes.map(theme => (
-                                <option key={theme} value={theme}>
-                                    {theme}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                <div className="form-group">
+                    <label htmlFor="theme">
+                        Тематика
+                    </label>
+                    <select
+                        id="theme"
+                        name="theme"
+                        value={formData.theme}
+                        onChange={handleChange}
+                    >
+                        {themes.map(theme => (
+                            <option key={theme} value={theme}>
+                                {theme}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
                     
-                    <div className="form-group full-width">
-                        <label>Фото</label>
-                        <div className="upload-method-selector">
-                            <button
-                                type="button"
-                                className={`method-btn ${uploadMethod === 'url' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setUploadMethod('url');
-                                    setImageFile(null);
-                                    setImagePreview('');
-                                }}
-                            >
-                                📎 URL посилання
-                            </button>
-                            <button
-                                type="button"
-                                className={`method-btn ${uploadMethod === 'file' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setUploadMethod('file');
-                                    setFormData(prev => ({ ...prev, imageUri: '' }));
-                                }}
-                            >
-                                📤 Завантажити файл
-                            </button>
-                        </div>
-                    </div>
-
-                    {uploadMethod === 'url' ? (
-                        <div className="form-group full-width">
-                            <label htmlFor="imageUri">URL фото</label>
-                            <input
-                                type="text"
-                                id="imageUri"
-                                name="imageUri"
-                                value={formData.imageUri}
-                                onChange={handleChange}
-                                placeholder="https://example.com/image.jpg"
-                                className={errors.imageUri ? 'error' : ''}
-                            />
-                            {errors.imageUri && <span className="error-message">{errors.imageUri}</span>}
-                        </div>
-                    ) : (
-                        <div className="form-group full-width">
-                            <label htmlFor="imageFile">Виберіть файл</label>
-                            <div className="file-upload-wrapper">
-                                <input
-                                    type="file"
-                                    id="imageFile"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    className="file-input"
-                                />
-                                <label htmlFor="imageFile" className="file-input-label">
-                                    {imageFile ? imageFile.name : 'Натисніть для вибору файлу'}
-                                </label>
-                                {imageFile && (
-                                    <button
-                                        type="button"
-                                        onClick={handleRemoveImage}
-                                        className="btn-remove-file"
-                                    >
-                                        ✕
-                                    </button>
-                                )}
-                            </div>
-                            {errors.imageUri && <span className="error-message">{errors.imageUri}</span>}
-                        </div>
-                    )}
-
-                    {/* Попередній перегляд фото */}
-                    {((uploadMethod === 'url' && formData.imageUri && !errors.imageUri) || 
-                      (uploadMethod === 'file' && imagePreview)) && (
-                        <div className="image-preview">
-                            <img 
-                                src={uploadMethod === 'url' ? formData.imageUri : imagePreview} 
-                                alt="Попередній перегляд" 
-                            />
-                        </div>
-                    )}
-
-                    <div className="form-group">
-                        <label htmlFor="link">
-                            Посилання (необов'язково)
-                        </label>
-                        <input
-                            type="text"
-                            id="link"
-                            name="link"
-                            value={formData.link}
-                            onChange={handleChange}
-                            placeholder="https://example.com/article"
-                            className={errors.link ? 'error' : ''}
-                        />
-                        {errors.link && <span className="error-message">{errors.link}</span>}
-                    </div>
-                    
-                    {/* актуальність?">
-                        <label>
-                            <input
-                                type="checkbox"
-                                name="isActual"
-                                checked={formData.isActual}
-                                onChange={handleChange}
-                            />
-                            <span>Актуальна новина</span>
-                        </label>
-                    </div>
-*/}
-                    {errors.submit && (
-                        <div className="error-message submit-error">
-                            {errors.submit}
-                        </div>
-                    )}
-
-                    <div className="form-actions">
+                <div className="form-group full-width">
+                    <label>Фото</label>
+                    <div className="upload-method-selector">
                         <button
                             type="button"
-                            className="btn-cancel"
-                            onClick={() => navigate(-1)}
-                            disabled={isSubmitting}
+                            className={`method-btn ${uploadMethod === 'url' ? 'active' : ''}`}
+                            onClick={() => {
+                                setUploadMethod('url');
+                                setImageFile(null);
+                                setImagePreview('');
+                            }}
                         >
-                            Скасувати
+                            📎 URL посилання
                         </button>
                         <button
-                            type="submit"
-                            className="btn-submit"
-                            disabled={isSubmitting}
+                            type="button"
+                            className={`method-btn ${uploadMethod === 'file' ? 'active' : ''}`}
+                            onClick={() => {
+                                setUploadMethod('file');
+                                setFormData(prev => ({ ...prev, imageUri: '' }));
+                            }}
                         >
-                            {isSubmitting ? 'Створення...' : 'Створити новину'}
+                            📤 Завантажити файл
                         </button>
                     </div>
+                </div>
+
+                {uploadMethod === 'url' ? (
+                    <div className="form-group full-width">
+                        <label htmlFor="imageUri">URL фото</label>
+                        <input
+                            type="text"
+                            id="imageUri"
+                            name="imageUri"
+                            value={formData.imageUri}
+                            onChange={handleChange}
+                            placeholder="https://example.com/image.jpg"
+                            className={errors.imageUri ? 'error' : ''}
+                        />
+                        {errors.imageUri && <span className="error-message">{errors.imageUri}</span>}
+                    </div>
+                ) : (
+                    <div className="form-group full-width">
+                        <label htmlFor="imageFile">Виберіть файл</label>
+                        <div className="file-upload-wrapper">
+                            <input
+                                type="file"
+                                id="imageFile"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="file-input"
+                            />
+                            <label htmlFor="imageFile" className="file-input-label">
+                                {imageFile ? imageFile.name : 'Натисніть для вибору файлу'}
+                            </label>
+                            {imageFile && (
+                                <button
+                                    type="button"
+                                    onClick={handleRemoveImage}
+                                    className="btn-remove-file"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
+                        {errors.imageUri && <span className="error-message">{errors.imageUri}</span>}
+                    </div>
+                )}
+
+                {/* Попередній перегляд фото */}
+                {((uploadMethod === 'url' && formData.imageUri && !errors.imageUri) || 
+                    (uploadMethod === 'file' && imagePreview)) && (
+                    <div className="image-preview">
+                        <img 
+                            src={uploadMethod === 'url' ? formData.imageUri : imagePreview} 
+                            alt="Попередній перегляд" 
+                        />
+                    </div>
+                )}
+
+                <div className="form-group">
+                    <label htmlFor="link">
+                        Посилання (необов'язково)
+                    </label>
+                    <input
+                        type="text"
+                        id="link"
+                        name="link"
+                        value={formData.link}
+                        onChange={handleChange}
+                        placeholder="https://example.com/article"
+                        className={errors.link ? 'error' : ''}
+                    />
+                    {errors.link && <span className="error-message">{errors.link}</span>}
+                </div>
+                    
+                {/* актуальність?">
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="isActual"
+                            checked={formData.isActual}
+                            onChange={handleChange}
+                        />
+                        <span>Актуальна новина</span>
+                    </label>
+                </div>
+                */}
+                {errors.submit && (
+                    <div className="error-message submit-error">
+                        {errors.submit}
+                    </div>
+                )}
+
+                <div className="form-actions">
+                    <button
+                        type="button"
+                        className="btn-cancel"
+                        onClick={() => navigate(-1)}
+                        disabled={isSubmitting}
+                    >
+                        Скасувати
+                    </button>
+                    <button
+                        type="submit"
+                        className="btn-submit"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Створення...' : 'Створити новину'}
+                    </button>
+                </div>
                 </form>
             </div>
         </div>

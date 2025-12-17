@@ -10,11 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.14.1",
-    "@grpc/proto-loader": "^0.8.0",
     "@tailwindcss/vite": "^4.0.8",
     "axios": "^1.8.1",
     "firebase": "^12.5.0",
+    "openssl": "^2.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.2.0",

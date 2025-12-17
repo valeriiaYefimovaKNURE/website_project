@@ -1,37 +1,41 @@
 const grpc = require("@grpc/grpc-js");
 const protoLoader = require("@grpc/proto-loader");
 const path = require("path");
+const { sendTelegramNewPost } = require("../../lib/telegram");
 
-const PROTO_PATH = path.join(__dirname, "../proto/news.proto");
+const PROTO_PATH = path.join(__dirname, "proto", "notifications.proto");
 
-const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-  keepCase: true,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true,
-});
+const packageDefinition = protoLoader.loadSync(PROTO_PATH);
+const proto = grpc.loadPackageDefinition(packageDefinition).notifications;
 
-const newsProto = grpc.loadPackageDefinition(packageDefinition).news; //package name
+function NotifyNewPost(call, callback) {
+  console.log("📩 New post received via gRPC:", call.request);
 
-//функції сервісу
-const newsService = {
-    GetNews: (call, callback) => {
-
-    }
-};
+  sendTelegramNewPost(call.request)
+    .then(() => callback(null, { success: true }))
+    .catch((err) => {
+      console.error("❌ Telegram error:", err);
+      callback(null, { success: false });
+    });
+}
 
 function startGrpcServer() {
     const server = new grpc.Server();
-    server.addService(newsProto.NewsService.service, newsService);
-
-    const GRPC_PORT = "50051";
-    const ADDRESS=`0:0.0.0:${GRPC_PORT}`;
-
-    server.bindAsync(ADDRESS, grpc.ServerCredentials.createInsecure(), () => {
-        console.log(`gRPC server running at ${ADDRESS}`);
-        server.start();
+    server.addService(proto.NotificationService.service, {
+        NotifyNewPost
     });
+
+    const ADDRESS = "0.0.0.0:50051";
+
+    server.bindAsync(ADDRESS, grpc.ServerCredentials.createInsecure(),
+        (err) => {
+            if (err) {
+              console.error("gRPC bind error:", err);
+              return;
+            }
+            console.log(`gRPC server running at ${ADDRESS}`);
+        }
+    );
 
     return server;
 }
