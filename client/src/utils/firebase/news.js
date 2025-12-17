@@ -1,90 +1,94 @@
 import axios from "axios";
 
-export const fetchNews = async () => {
-    try {
-      const newsInfo = await axios.get("https://localhost:8080/news");
-      return newsInfo.data;
-    } catch (error) {
-      console.error("AdminPage / Помилка при завантаженні новин:", error);
-      return [];
-    }
-  };
+const API_URL = "https://localhost:8080/graphql";
 
-export const fetchNewsById = async(id) => {
-  try{
-    // if (!id ) throw new Error("news_id відсутнє!");
-     const response = await axios.get(`https://localhost:8080/news/${id}`);
-    return response.data;
-  }catch(error){
-    console.error("AdminPage / Помилка при завантаженні новини:", error);
-    return null;
+const graphqlRequest = async (query, variables = {}) => {
+  try {
+    const response = await axios.post(API_URL, { query, variables });
+    
+    if (response.data.errors) {
+      console.error("GraphQL Errors:", response.data.errors);
+      throw new Error(response.data.errors[0].message);
+    }
+    
+    return response.data.data;
+  } catch (error) {
+    console.error("Network/Server Error:", error.message);
+    throw error;
   }
+};
+
+export const fetchNews = async () => {
+  const query = `
+    query {
+      getAllNews {
+        id
+        title
+        content
+        theme
+        date
+        creatorLogin
+        imageUri
+      }
+    }
+  `;
+  const data = await graphqlRequest(query);
+  return data.getAllNews;
+};
+
+export const fetchNewsById = async (id) => {
+  const query = `
+    query GetNews($id: ID!) {
+      getNewsById(id: $id) {
+        id
+        title
+        content
+        theme
+        date
+        imageUri
+
+      }
+    }
+  `;
+  const data = await graphqlRequest(query, { id });
+  return data.getNewsById;
 };
 
 export const fetchThemes = async () => {
-  try {
-    const themesInfo = await axios.get("https://localhost:8080/news/themes");  
-    return themesInfo.data;
-  } catch (error) {
-    console.error("AdminPage / Помилка при завантаженні тем новин:", error);
-    return [];
-  } 
+  const query = `
+    query {
+      getThemes
+    }
+  `;
+  const data = await graphqlRequest(query);
+  return data.getThemes;
 };
 
-export const createNews=async(newsData)=>{
-    try {
-      const response = await fetch("https://localhost:8080/news", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newsData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Помилка при створенні новини");
+export const createNews = async (newsData) => {
+  const mutation = `
+    mutation Create($input: NewsInput!) {
+      createNews(input: $input) {
+        id
       }
-
-      const createdNews = await response.json();
-      console.log("Допис викладено:", createdNews);
-
-    } catch (error) {
-      console.error("createNews:", error.message);
-      throw error;
     }
-}
+  `;
+  return await graphqlRequest(mutation, { input: newsData });
+};
 
-export const handleSaveNewsData=async(row, updatedFields)=>{
-    try{
-      const newsId=row.id;
-      if (!newsId) throw new Error("Немає ID новини для оновлення");
-
-      const response=await fetch(`https://localhost:8080/news/${newsId}`,{
-        method:"PUT",
-        headers:{
-          "Content-type":"application/json"
-        },
-        body:JSON.stringify(updatedFields)
-      })
-
-      if(!response.ok) throw new Error("Виникла помилка при оновленні даних новини");
-      console.log(response);
-
-    }catch(error){
-      console.error("handleSaveNewsData(): Помилка при збереженні новини:", error.message);
-      throw error;
+export const handleSaveNewsData = async (row, updatedFields) => {
+  const mutation = `
+    mutation Update($id: ID!, $title: String, $content: String, $theme: String, $imageUri: String) {
+      updateNews(id: $id, title: $title, content: $content, theme: $theme, imageUri: $imageUri)
     }
-  }
+  `;
+  return await graphqlRequest(mutation, { id: row.id, ...updatedFields });
+};
 
 export const handleDeleteNewsData = async (id) => {
-    try {
-      const response = await fetch(`https://localhost:8080/news/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Помилка при видаленні новини");
-    } catch (error) {
-      console.error("handleDeleteNewsData():", error.message);
-      throw error;
+  const mutation = `
+    mutation Delete($id: ID!) {
+      deleteNews(id: $id)
     }
-  };
+  `;
+  return await graphqlRequest(mutation, { id });
+};
