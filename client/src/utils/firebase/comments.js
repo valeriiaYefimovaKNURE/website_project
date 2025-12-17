@@ -13,7 +13,6 @@ const graphqlRequest = async (query, variables = {}) => {
   }
 };
 
-// 1. Отримання всіх коментарів для адмінки
 export const fetchComments = async () => {
   const query = `
     query {
@@ -33,7 +32,6 @@ export const fetchComments = async () => {
   return data.getAllComments;
 };
 
-// 2. Отримання коментарів для конкретної новини
 export const fetchCommentsByNewsId = async (newsId) => {
   const query = `
     query GetComments($newsId: ID!) {
@@ -50,7 +48,6 @@ export const fetchCommentsByNewsId = async (newsId) => {
   return data.getCommentsByNewsId;
 };
 
-// 3. Створення коментаря
 export const createComment = async (commentData) => {
   const mutation = `
     mutation CreateComment($newsId: ID!, $input: CommentInput!) {
@@ -63,16 +60,15 @@ export const createComment = async (commentData) => {
     }
   `;
 
-  // Розділяємо дані: newsId окремо, решту полів — в input
   const { news_id, ...inputData } = commentData;
 
   const variables = {
-    newsId: news_id, // передаємо ID новини як перший аргумент
+    newsId: news_id,
     input: {
       text: inputData.text,
       user_uid: inputData.user_uid,
       user_login: inputData.user_login,
-      user_name: inputData.user_login, // або залиш порожнім, якщо немає окремого поля
+      user_name: inputData.user_login,
       date: inputData.date
     }
   };
