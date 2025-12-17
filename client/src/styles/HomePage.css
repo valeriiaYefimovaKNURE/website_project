@@ -1,9 +1,8 @@
-.mepower-logo{
-  align-items: center;
+
+.mepower-logo {
   width: 7%;
   height: auto;
   object-fit: contain;
-  margin-left: -18%;
   transition: width 0.3s ease;
 }
 
@@ -89,3 +88,90 @@
 }
 
 
+
+
+
+@media (max-width: 1024px) {
+  .hero-banner {
+    gap: 1.5rem;
+  }
+  
+  .hero-text_title {
+    font-size: 2rem;
+  }
+  
+  .mepower-logo {
+   
+    min-width: 80px; 
+    width: 10%;
+  }
+}
+
+@media (max-width: 768px) {
+
+ .hero-banner {
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 20px;
+}
+
+.hero-image {
+  width: 100%;
+}
+
+.hero-text_title {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.hero-text_subtitle {
+  text-align: center;
+
+  }
+
+  .mepower-logo {
+    width: 15%;
+    
+    margin-left: 1rem;
+  }
+
+  
+  .sort-container {
+    justify-content: center;
+    margin-right: 0; 
+    margin-top: 2rem;
+  }
+
+  .news-intro {
+    margin: 3rem auto 1.5rem auto;
+  }
+
+  .news-intro_title {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-text_title {
+    font-size: 1.5rem;
+  }
+
+  .hero-text_subtitle {
+    font-size: 1rem;
+  }
+
+  .mepower-logo {
+    width: 10%; 
+  }
+
+  .sort-text {
+    font-size: 0.9rem;
+  }
+
+  .sort-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+}

@@ -48,22 +48,26 @@ function HomePage() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full bg-white shadow-md flex items-center justify-between px-6 py-4 z-50">
-        <div className="flex space-x-6">
+      <header className="fixed top-0 left-0 w-full bg-white shadow-md flex items-center justify-between px-6 py-10 z-50">
+        {/* Ліва частина */}
+        <div className="hidden md:flex space-x-6">
           <a>Me.We.Women</a>
           <a>Про додаток</a>
           <a>Топ</a>
           <a>Завантажити</a>
         </div>
 
-        <img src="mepower_logo.png" className="mepower-logo" />
+        {/* Логотип - тепер він абсолютний відносно хедеру */}
+        <img
+          src="mepower_logo.png"
+          className="mepower-logo absolute left-1/2 -translate-x-1/2"
+          alt="logo"
+        />
 
+        {/* Права частина */}
         <div className="flex flex-row space-x-6 items-center">
           <p>{user?.name}</p>
-
-          {user && (
-    <AddArticleButton />
-  )}
+          {user && <AddArticleButton />}
           {user ? (
             <button onClick={() => navigate("/admin")}>Адмінська панель</button>
           ) : (
@@ -71,7 +75,6 @@ function HomePage() {
           )}
         </div>
       </header>
-
       <main className="pt-20">
         <section className="hero-banner flex items-center justify-between px-5 py-16 max-w-6xl mx-auto">
           <div className="hero-text w-1/2 pr-8">
@@ -144,8 +147,7 @@ function HomePage() {
         </section>
       </main>
 
-  
-       <Footer />
+      <Footer />
     </>
   );
 }
