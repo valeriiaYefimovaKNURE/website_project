@@ -29,6 +29,7 @@ export const fetchNews = async () => {
         date
         creatorLogin
         imageUri
+        likes
       }
     }
   `;
@@ -46,7 +47,7 @@ export const fetchNewsById = async (id) => {
         theme
         date
         imageUri
-
+        likes
       }
     }
   `;
@@ -77,8 +78,8 @@ export const createNews = async (newsData) => {
 
 export const handleSaveNewsData = async (row, updatedFields) => {
   const mutation = `
-    mutation Update($id: ID!, $title: String, $content: String, $theme: String, $imageUri: String) {
-      updateNews(id: $id, title: $title, content: $content, theme: $theme, imageUri: $imageUri)
+    mutation Update($id: ID!, $title: String, $content: String, $theme: String, $imageUri: String, $likes: Int) {
+      updateNews(id: $id, title: $title, content: $content, theme: $theme, imageUri: $imageUri, likes: $likes)
     }
   `;
   return await graphqlRequest(mutation, { id: row.id, ...updatedFields });
