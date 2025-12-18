@@ -30,7 +30,7 @@ const NewsDetailPage = () => {
   const [comments, setComments] = useState(initialComments);
   const [articleState, setArticleState] = useState(null);
 
-  const { viewersCount, newComment: wsNewComment, isConnected } = useWebSocket(id);
+  const { viewersCount, newComment: wsNewComment, likesUpdate,isConnected } = useWebSocket(id);
 
   useEffect(() => {
     if (initialComments.length >= 0) {
@@ -41,9 +41,8 @@ const NewsDetailPage = () => {
   useEffect(() => {
     if (wsNewComment) {
       setComments(prev => {
-        const exists = prev.some(c => 
-          c.id === wsNewComment.id || 
-          (c.text === wsNewComment.text && c.date === wsNewComment.date && c.user_uid === wsNewComment.user_uid)
+        const exists = prev.some(c =>
+          c.id === wsNewComment.id
         );
         
         if (exists) return prev;
@@ -51,6 +50,15 @@ const NewsDetailPage = () => {
       });
     }
   }, [wsNewComment]);
+
+  useEffect(() => {
+    if (likesUpdate !== null) {
+      setArticleState(prev => ({
+        ...prev,
+        likes: likesUpdate
+      }));
+    }
+  }, [likesUpdate]);
 
   useEffect(() => {
     if (article) {
@@ -122,9 +130,7 @@ const NewsDetailPage = () => {
       };
       const result = await createComment(comment);
       const createdComment = result.createComment;
-      setComments(prev => [...prev, createdComment]);
       console.log("Sending comment:", user); 
-
 
       setNewComment("");
     } catch (err) {

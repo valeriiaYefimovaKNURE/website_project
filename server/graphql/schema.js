@@ -142,7 +142,16 @@ const resolvers = {
       return true;
     },
 
-    createComment: async (_, { newsId, input }) => await createComment(newsId, input),
+    createComment: async (_, { newsId, input }, { broadcastNewComment }) => {
+      const comment = await createComment(newsId, input);
+
+      broadcastNewComment({
+        ...comment,
+        news_id: newsId
+      });
+
+      return comment;
+    },
     
     updateComment: async (_, { newsId, commentId, ...fields }) => {
       await updateComment(newsId, commentId, fields);
@@ -159,15 +168,23 @@ const resolvers = {
       return true;
     },
 
-    createLike: async (_, { userId, newsId }) => {
+    createLike: async (_, { userId, newsId }, { broadcastLikesUpdate }) => {
       await createLike(userId, newsId);
-      return await getNewsById(newsId);
+      const news = await getNewsById(newsId);
+        
+      broadcastLikesUpdate(newsId, news.likes);
+        
+      return news;
     },
 
-    deleteLike: async (_, { userId, newsId }) => {
+    deleteLike: async (_, { userId, newsId }, { broadcastLikesUpdate }) => {
       await deleteLike(userId, newsId);
-      return await getNewsById(newsId);
-    }
+      const news = await getNewsById(newsId);
+    
+      broadcastLikesUpdate(newsId, news.likes);
+    
+      return news;
+    }   
   }
 };
 

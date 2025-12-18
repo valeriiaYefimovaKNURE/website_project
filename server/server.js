@@ -41,6 +41,7 @@ const server = https.createServer({
 
 const ws = initNewsSocket(server);
 app.locals.broadcastNewComment = ws.broadcastNewComment;
+app.locals.broadcastLikesUpdate = ws.broadcastLikesUpdate;
 
 startGrpcServer();
 
@@ -48,7 +49,11 @@ async function startApolloServer() {
     const serverGraphQL = new ApolloServer({
         typeDefs,
         resolvers,
-        introspection: true, 
+        context: () => ({
+          broadcastNewComment: ws.broadcastNewComment,
+          broadcastLikesUpdate: ws.broadcastLikesUpdate,
+        }),
+        introspection: true,
     });
 
     await serverGraphQL.start();

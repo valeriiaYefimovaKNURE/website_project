@@ -71,7 +71,21 @@ function initNewsSocket(server) {
     });
   }
 
-  return { viewers, broadcastNewComment };
+  function broadcastLikesUpdate(news_id, likes) {
+    const newsViewers = viewers[news_id];
+    if (!newsViewers) return;
+
+    newsViewers.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          type: "likes_updated",
+          data: { news_id, likes }
+        }));
+      }
+    });
+  }
+
+  return { viewers, broadcastNewComment, broadcastLikesUpdate };
 }
 
 module.exports = { initNewsSocket };

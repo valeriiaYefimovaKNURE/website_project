@@ -6,6 +6,7 @@ const WS_URL = "wss://localhost:8080";
 const useWebSocket = (newsId) => {
   const [viewersCount, setViewersCount] = useState(0);
   const [newComment, setNewComment] = useState(null);
+  const [likesUpdate, setLikesUpdate] = useState(null);
   const didJoinRef = useRef(false);
 
   const { sendMessage, lastMessage, readyState } = useWebSocketLib(WS_URL, {
@@ -51,19 +52,16 @@ const useWebSocket = (newsId) => {
         if (msg.type === "new_comment" && msg.data.news_id === newsId) {
           setNewComment(msg.data);
         }
+        // Оновлення лайків
+        if (msg.type === "likes_updated" && msg.data.news_id === newsId) {
+          setLikesUpdate(msg.data.likes);
+        }       
 
       } catch (err) {
         console.error('Помилка парсингу:', err);
       }
     }
   }, [lastMessage, newsId]);
-
-  // Heartbeat
-  useEffect(() => {
-    if (readyState === WebSocket.OPEN && newsId) {
-      sendMessage(JSON.stringify({ type: "join", data: { news_id: newsId } }));
-    }
-  }, [readyState, newsId, sendMessage]);
 
   // Скидаємо стан при зміні newsId
   useEffect(() => {
@@ -74,7 +72,7 @@ const useWebSocket = (newsId) => {
 
   const isConnected = readyState === WebSocket.OPEN;
 
-  return { viewersCount, newComment, isConnected };
+  return { viewersCount, newComment, isConnected, likesUpdate };
 };
 
 export default useWebSocket;
