@@ -56,8 +56,12 @@ const typeDefs = gql`
     theme: String
     date: String
     creatorLogin: String
+    creatorName: String
+    creatorUid: String
     imageUri: String
     likes: Int
+    link: String
+    isActual: Boolean
     commentsArray: [Comment] 
   }
 
@@ -98,7 +102,7 @@ const typeDefs = gql`
 
   type Mutation {
     createNews(input: NewsInput!): News
-    updateNews(id: ID!, title: String, content: String, theme: String, imageUri: String): News
+    updateNews(id: ID!, title: String,subtitle: String, content: String, theme: String, imageUri: String, link: String, isActual: Boolean): News
     deleteNews(id: ID!): Boolean
     
     createComment(newsId: ID!, input: CommentInput!): Comment

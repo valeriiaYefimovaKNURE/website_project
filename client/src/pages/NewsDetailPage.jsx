@@ -32,14 +32,12 @@ const NewsDetailPage = () => {
 
   const { viewersCount, newComment: wsNewComment, isConnected } = useWebSocket(id);
 
-  // Оновлюємо коментарі, коли вони завантажилися
   useEffect(() => {
     if (initialComments.length >= 0) {
       setComments(initialComments);
     }
   }, [initialComments.length]);
 
-  //Новий коментар з WebSocket
   useEffect(() => {
     if (wsNewComment) {
       setComments(prev => {
@@ -62,30 +60,37 @@ const NewsDetailPage = () => {
 
 
   const handleLike = async () => {
-    if (!user) {
-      return;
-    }
-    try {
-      if (!isLiked) {
-        await fetchCreateLike(user.id, id);
-        setIsLiked(true);
+  if (!user) return;
+
+  try {
+    let response; 
+
+    if (!isLiked) {
+      response = await fetchCreateLike(user.id, id);
+      setIsLiked(true);
+      
+      if (response && response.createLike) {
         setArticleState(prev => ({
           ...prev,
-          likes: (prev.likes || 0) + 1
+          likes: response.createLike.likes
         }));
+      }
     } else {
-      await fetchDeleteLike(user.id, id);
+      response = await fetchDeleteLike(user.id, id);
       setIsLiked(false);
-      setArticleState(prev => ({
-        ...prev,
-        likes: Math.max((prev.likes || 1) - 1, 0)
-      }));
+      
+      if (response && response.deleteLike) {
+        setArticleState(prev => ({
+          ...prev,
+          likes: response.deleteLike.likes
+        }));
+      }
     }
   } catch (error) {
     console.error("Помилка лайку:", error);
     alert("Не вдалося змінити лайк");
   }
-  };
+};
 
   useEffect(() => {
     if (!user) return;
@@ -115,9 +120,11 @@ const NewsDetailPage = () => {
         user_uid: user.id,
         hasReport: false
       };
+      const result = await createComment(comment);
+      const createdComment = result.createComment;
+      setComments(prev => [...prev, createdComment]);
       console.log("Sending comment:", user); 
 
-      await createComment(comment);
 
       setNewComment("");
     } catch (err) {
