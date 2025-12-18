@@ -76,11 +76,16 @@ const typeDefs = gql`
   input NewsInput {
     title: String!
     subtitle: String
-    content: String!
+    content: String
     theme: String
     date: String
-    creatorName: String
     imageUri: String
+    link: String
+    creatorUid: String
+    creatorLogin: String
+    creatorName: String
+    likes: Int
+    isActual: Boolean
   }
 
   input CommentInput {

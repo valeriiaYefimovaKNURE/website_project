@@ -12,10 +12,11 @@ const CreateNewsPage = () => {
     const [formData, setFormData] = useState({
         title: '',
         subtitle: '',
+        content: '',
         imageUri: '',
         link: '',
         theme: 'Новини',
-        isActual: true
+        isActual: false
     });
 
     const [errors, setErrors] = useState({});
@@ -143,16 +144,15 @@ const CreateNewsPage = () => {
                 date: formatDate(new Date()),
                 likes: 0,
                 creatorUid:user.id,
+                content: formData.content,
                 creatorLogin:user.login,
                 creatorName:user.name
             };
             
-            // Відправка даних на сервер
             await createNews(newsData);
             
             console.log('Створено новину:', newsData);
             
-            // переход на сторінку з новинами
             navigate("/");
         } catch (error) {
             console.error('Помилка при створенні новини:', error);
