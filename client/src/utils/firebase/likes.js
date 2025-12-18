@@ -37,10 +37,13 @@ export const fetchCreateLike = async (userId, newsId) => {
 
 export const fetchDeleteLike = async (userId, newsId) => {
   const mutation = `
-    mutation RemoveLike($userId: ID!, $newsId: ID!) {
-      deleteLike(userId: $userId, newsId: $newsId)
+    mutation DeleteLike($userId: ID!, $newsId: ID!) {
+      deleteLike(userId: $userId, newsId: $newsId){
+      id 
+      likes
+      }
     }
   `;
   const data = await graphqlRequest(mutation, { userId, newsId });
-  return data.deleteLike;
+  return data;
 };
